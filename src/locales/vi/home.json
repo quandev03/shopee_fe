@@ -1,0 +1,22 @@
+{
+  "category": {
+    "all categories": "Tất cả danh mục",
+    "watch": "Đồng hồ",
+    "shirt": "Áo thun",
+    "phone": "Điện thoại"
+  },
+
+  "search filter": "Bộ lọc tìm kiếm",
+  "price range": "Khoản giá",
+  "min": "TỪ",
+  "max": "ĐẾN",
+  "rating": "Xếp hạng",
+  "& up": "Trở lên",
+  "sort by": "Sắp xếp theo",
+  "popular": "Phổ biên",
+  "latest": "Mới nhất",
+  "top sales": "Bán Chạy",
+  "price": "Giá",
+  "low to high": "Giá: Thấp đến cao",
+  "high to low": "Cao: Cao đến thấp"
+}

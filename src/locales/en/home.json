@@ -1,0 +1,22 @@
+{
+  "category": {
+    "all categories": "All categories",
+    "watch": "Watch",
+    "shirt": "Shirt",
+    "phone": "Phone"
+  },
+
+  "search filter": "SEARCH FILTER",
+  "price range": "Price range",
+  "min": "MIN",
+  "max": "MAX",
+  "rating": "rating",
+  "& up": "& Up",
+  "sort by": "Sort by",
+  "popular": "Popular",
+  "latest": "Latest",
+  "top sales": "Top Sales",
+  "price": "Price",
+  "low to high": "Price: Low to High",
+  "high to low": "Price: High to Low"
+}
