@@ -112,10 +112,12 @@ export default function ProductDetail() {
     imageRef.current?.removeAttribute('style');
   };
 
+  // todo: thay đổi số lượng mua
   const handleChangeQuantity = (value: number) => {
     setBuyCount(value);
   };
 
+  // todo thêm vào giỏ hàng
   const handleAddToCart = (body: ProductCart) => {
     addToCartMutation.mutate(body, {
       onSuccess: () => {
@@ -126,7 +128,7 @@ export default function ProductDetail() {
       }
     });
   };
-
+// Todo: nút mua ngay
   const buyNow = async (body: ProductCart) => {
     const res = await addToCartMutation.mutateAsync(body);
     const purchase = res.data.data;
@@ -141,6 +143,7 @@ export default function ProductDetail() {
   if (!product) return null;
 
   return (
+    // Todo: giao diện chi tiết sản phẩm
     <div className='relative bg-gray-100 py-3'>
       <Helmet>
         <title>{product.name}</title>
