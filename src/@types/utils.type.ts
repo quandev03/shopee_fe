@@ -1,7 +1,7 @@
-export interface ResponseSuccessType<Data> {
+export type ResponseSuccessType<Data> = {
   message: string;
   data: Data;
-}
+};
 
 export interface ResponseErrorType<Data> {
   message: string;

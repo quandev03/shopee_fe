@@ -115,7 +115,7 @@ export default function NavHeader() {
             />
           </div>
 
-          <span className='mx-1'>{profile?.email}</span>
+          <span className='mx-1'>{profile?.username}</span>
         </Popover>
       )}
 
