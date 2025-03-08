@@ -1,4 +1,4 @@
-import { Link, useMatch } from 'react-router-dom';
+ import { Link, useMatch } from 'react-router-dom';
 
 export default function AuthHeader() {
   const isLoginMode = useMatch('/login');

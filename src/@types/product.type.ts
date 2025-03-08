@@ -1,35 +1,34 @@
-export interface Product {
-  _id: string;
-  images: string[];
-  price: number;
-  rating: number;
-  price_before_discount: number;
-  quantity: number;
-  sold: number;
-  view: number;
-  description?: string;
+export interface ProductType {
+  id: string;
   name: string;
-  category: {
+  description?: string;
+  price: number;
+  quantity: number;
+  soldQuantity: number;
+  viewedQuantity: number;
+  images: string[]; // Nếu có nhiều hình ảnh, có thể là mảng
+  image: string | null; // Nếu không có ảnh, có thể là null
+  category?: {
     _id: string;
     name: string;
   };
-  image: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface ProductList {
-  products: Product[];
-  pagination: {
-    page: number;
-    limit: number;
-    page_size: number;
-  };
+  content: ProductType[]; // Mảng các sản phẩm
+  pageable: any; // Có thể thay bằng kiểu chính xác tùy thuộc vào cấu trúc API
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  numberOfElements: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
 }
 
 export interface ProductListConfig {
   page?: number | string;
-  limit?: number | string;
+  size?: number | string;
   order?: 'desc' | 'asc';
   sort_by?: 'createdAt' | 'view' | 'sold' | 'price';
   category?: string;
