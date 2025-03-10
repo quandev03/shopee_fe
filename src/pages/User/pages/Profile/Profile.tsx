@@ -25,6 +25,8 @@ type UserFormErrorData = Omit<UserFormSchema, 'date_of_birth'> & {
   date_of_birth: string;
 };
 
+
+
 function Info() {
   const {
     control,
@@ -39,7 +41,7 @@ function Info() {
         <meta name='description' content='Xem thông tin tài khoản của tôi' />
       </Helmet>
       <div className='mt-6 flex flex-col flex-wrap sm:flex-row'>
-        <div className='truncate capitalize text-gray-500 sm:mt-3 sm:w-[20%] sm:text-right'>Tên</div>
+        <div className='truncate capitalize text-gray-500 sm:mt-3 sm:w-[20%] sm:text-right' placeholder='profile?.email'>Tên</div>
         <div className='sm:w-[80%] sm:pl-5'>
           <Input
             classNameInput='w-full rounded-sm border border-gray-300 py-2 px-3 shadow-sm outline-none focus:border-gray-500'
@@ -71,15 +73,16 @@ function Info() {
         </div>
       </div>
       <div className='flex flex-col flex-wrap sm:mt-2 sm:flex-row'>
-        <div className='truncate capitalize text-gray-500 sm:mt-3 sm:w-[20%] sm:text-right'>Địa chỉ</div>
+        <div className='truncate capitalize text-gray-500 sm:mt-3 sm:w-[20%] sm:text-right'>Địa chỉ
+        </div>
         <div className='sm:w-[80%] sm:pl-5'>
-          <Input
-            classNameInput='w-full rounded-sm border border-gray-300 py-2 px-3 shadow-sm outline-none focus:border-gray-500'
-            name='address'
-            placeholder='Địa chỉ'
-            errorMessage={errors.address?.message}
-            register={register}
-          />
+          {/* them drop box */}
+          <select className='h-[40px] w-[32%] rounded-sm border px-3 outline-none hover:border-orange'>
+            <option value="1">Địa chỉ 1</option>
+            <option value="2">Địa chỉ 2</option>
+            <option value="3">Địa chỉ 3</option>
+            <option value="4">Địa chỉ 4</option>
+        </select>
         </div>
       </div>
     </Fragment>
@@ -208,7 +211,7 @@ export default function Profile() {
           <div className='flex-grow pt-4 sm:pt-8 md:pr-14'>
             <div className='col-span-12 md:col-span-8'>
               <div className='flex flex-col flex-wrap sm:flex-row'>
-                <div className='text-gray-500 sm:w-[20%] sm:text-right '>Email</div>
+                <div className='text-gray-500 sm:w-[20%] sm:text-right '>Username</div>
                 <div className='sm:w-[80%] sm:pl-5'>{profile?.email}</div>
               </div>
               <Info />
