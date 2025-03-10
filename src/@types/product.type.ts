@@ -1,6 +1,8 @@
 export interface ProductType {
+  priceBeforeDiscount: number;
+  rating: number;
   id: string;
-  name: string;
+  nameProduct: string;
   description?: string;
   price: number;
   quantity: number;
@@ -15,6 +17,8 @@ export interface ProductType {
 }
 
 export interface ProductList {
+  pagination: any;
+  data: any;
   content: ProductType[]; // Mảng các sản phẩm
   pageable: any; // Có thể thay bằng kiểu chính xác tùy thuộc vào cấu trúc API
   totalElements: number;

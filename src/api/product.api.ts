@@ -4,11 +4,12 @@ import {ProductListConfig, ProductList, ProductType} from 'src/@types/product.ty
 export const productApi = {
   // API để lấy danh sách sản phẩm
   getProductList: (queryConfig: ProductListConfig) => {
-    return api.post<ProductList>('/products', queryConfig);
+    return api.get<ProductList>('/product/get-list', {
+    });
   },
 
   // API để lấy chi tiết sản phẩm
   getProduct: (id: string) => {
-    return api.get<ProductType>(`/products/${id}`);
+    return api.get<ProductType>(`/product/dataProduct?id=${id}`);
   }
 };
