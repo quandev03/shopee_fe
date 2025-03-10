@@ -67,7 +67,7 @@ export default function Login() {
         }
         const id: any= result.data.id;
         const username:string = result.data.username;
-        const accessToken:string = result.data.username;
+        const accessToken:string = result.data.accessToken;
         const refreshToken:string = result.data.refreshToken;
         const roles :  BackendRole | BackendRole[] = result.data.roles;
         const avatar:string|null = result.data.avatar;
