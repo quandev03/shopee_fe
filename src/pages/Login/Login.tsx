@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Schema, schema } from 'src/utils/rules';
 import Input from 'src/components/Form/Input';
