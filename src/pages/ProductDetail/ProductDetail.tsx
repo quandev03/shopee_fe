@@ -30,6 +30,9 @@ export default function ProductDetail() {
     }
   });
 
+  const [role, setRole] = useState<number>(0);
+  let cfm, btn = "";
+
   const [showToastSuccess, setShowToastSuccess] = useState(false);
 
   const [buyCount, setBuyCount] = useState(1);
@@ -55,6 +58,15 @@ export default function ProductDetail() {
   const currentImagesList = useMemo(() => {
     return (product as ProductType)?.images.slice(...currentImagesIndex);
   }, [product, currentImagesIndex]);
+
+  if (role == 0){
+    cfm = "mua ngay";
+    btn = "thêm vào giỏ hàng";
+  }
+  else {
+    cfm = "lưu";
+    btn = "sửa";
+  }
 
   const addToCartMutation = useMutation({
     mutationFn: (body: ProductCart) => {
@@ -226,7 +238,16 @@ export default function ProductDetail() {
           </div>
 
           <div className='col-span-7'>
-            <h1 className='text-xl font-medium uppercase'>{product.name}</h1>
+            <h1 className='text-xl font-medium uppercase'>
+              {
+                role === 1?(
+                  <input type="text" placeholder={product.name} style={{width: '600px', border: '1px solid '}}/>
+                )
+                : role === 0?(
+                  <span className='text-xl font-medium uppercase'>{product.name}</span>
+                ) : product.name
+              }
+            </h1>
             <div className='my-4 flex items-center'>
               <div className='flex items-center gap-1'>
                 <span className='mt-1 text-orange underline'>{product.rating}</span>
@@ -246,9 +267,27 @@ export default function ProductDetail() {
             </div>
 
             <div className='flex items-center bg-gray-100 px-6 py-4'>
-              <span className='text-gray-500 line-through'>₫{formatCurrency(product.price_before_discount)}</span>
+              <span className='text-gray-500 line-through'>₫{
+              //formatCurrency(product.price_before_discount)
 
-              <div className='ml-3 text-3xl text-orange'>₫{formatCurrency(product.price)}</div>
+                role === 1?(
+                  <input type="text" placeholder={formatCurrency(product.price_before_discount)} style={{width: '100px', border: '1px solid '}}/>
+                )
+                : role === 0?(
+                  <span className='text-xl font-medium uppercase'>{product.price_before_discount}</span>
+                ) : product.price_before_discount
+
+              }</span>
+
+              <div className='ml-3 text-3xl text-orange'>₫{
+              //formatCurrency(product.price)
+              role === 1?(
+                <input type="text" placeholder={formatCurrency(product.price)} style={{width: '200px', border: '1px solid '}}/>
+              )
+              : role === 0?(
+                <span className='text-xl font-medium uppercase'>{product.price}</span>
+              ) : product.price
+              }</div>
 
               <div className='ml-5 rounded-sm bg-orange px-1 text-sm font-semibold uppercase text-white'>
                 <span>{saleRate(product.price_before_discount, product.price)} </span>
@@ -268,14 +307,24 @@ export default function ProductDetail() {
               />
 
               <span className='ml-5 text-gray-500'>
-                {product.quantity} {t('pieces available')}
+                {
+                //product.quantity
+                role === 1?(
+                  <input type="text" placeholder={formatCurrency(product.quantity)} style={{width: '100px', border: '1px solid '}}/>
+                )
+                : role === 0?(
+                  <span className='text-xl font-medium uppercase'>{product.quantity}</span>
+                ) : product.quantity
+                } {t('pieces available')}
               </span>
             </div>
 
             <div className='mt-6 flex items-center gap-4'>
               <button
                 onClick={() => {
-                  handleAddToCart({ product_id: id, buy_count: buyCount });
+                  if (role == 0){
+                    handleAddToCart({ product_id: id, buy_count: buyCount });
+                  }
                 }}
                 className='flex-items-center flex gap-2 rounded-sm border border-orange bg-orange/10 px-5 py-3 capitalize text-orange hover:bg-orange/20'
               >
@@ -293,16 +342,18 @@ export default function ProductDetail() {
                     d='M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z'
                   />
                 </svg>
-                {t('add to cart')}
+                {btn}
               </button>
-
+{/* nut mua ngay */}
               <button
                 onClick={() => {
-                  buyNow({ product_id: id, buy_count: buyCount });
+                  if (role == 0){
+                    buyNow({ product_id: id, buy_count: buyCount });
+                  }
                 }}
                 className='rounded-sm bg-orange px-5 py-3 capitalize text-white hover:bg-orange/80'
               >
-                {t('buy now')}
+                {cfm}
               </button>
             </div>
           </div>
