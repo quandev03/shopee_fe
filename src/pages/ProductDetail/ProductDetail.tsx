@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import DOMPurify from 'dompurify';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Key, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { productApi } from 'src/api/product.api';
 import { purchasesApi } from 'src/api/purchases.api';
@@ -9,7 +9,7 @@ import ProductRating from 'src/components/ProductRating';
 import QuantityController from 'src/components/QuantityController';
 import { path } from 'src/constants/path';
 import { purchasesStatus } from 'src/constants/purchases';
-import { ProductListConfig, Product as ProductType } from 'src/@types/product.type';
+import { ProductListConfig, ProductType as ProductType } from 'src/@types/product.type';
 import { ProductCart } from 'src/@types/purchases.type';
 import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, saleRate } from 'src/utils/utils';
 import Product from '../ProductList/components/Product';
@@ -23,37 +23,64 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const id = getIdFromNameId(nameId as string);
   const queryClient = useQueryClient();
-  const { data: productDetailData } = useQuery({
+  const { data: productDetailData, isLoading, error } = useQuery({
     queryKey: ['product', id],
     queryFn: () => {
       return productApi.getProduct(id as string);
     }
   });
 
+  // Query API lấy danh sách sản phẩm
+  const { data: productsData, isLoading: productsLoading } = useQuery({
+    queryKey: ['productList', { page: '1' }],
+    queryFn: () => productApi.getProductList(queryConfig as ProductListConfig),
+    keepPreviousData: true
+  });
+  const products = productsData?.data.content.map((product) => ({
+    id: product.id,
+    name: product.nameProduct,
+    description: product.description,
+    price: product.price,
+    quantity: product.quantity,
+    soldQuantity: product.soldQuantity,
+    viewedQuantity: product.viewedQuantity,
+    images: product.images != null ? product.images : [],
+    image: product.image? product.image : '',
+    category: product.category ? {
+      _id: product.category._id,
+      name: product.category.name
+    } : undefined
+  }));
+  
+  
+
+  console.log(productDetailData);
   const [showToastSuccess, setShowToastSuccess] = useState(false);
 
   const [buyCount, setBuyCount] = useState(1);
 
-  const product = productDetailData?.data.data;
+  const product = productDetailData?.data;
 
-  const queryConfig: ProductListConfig = { page: '1', limit: '20', category: product?.category._id };
+  const queryConfig: ProductListConfig = { page: '1', category: product?.category?._id };
 
   const { data: productList } = useQuery({
     queryKey: ['productListCategory', queryConfig],
     queryFn: () => {
-      return productApi.getProductList(queryConfig);
+      return productApi.getProduct(id as string);
     },
     enabled: Boolean(product)
   });
 
+  console.log("data check: ", productList)
   const imageRef = useRef<HTMLImageElement>(null);
 
   const [currentImagesIndex, setCurrentImageIndex] = useState([0, 5]);
 
   const [imageActived, setImageActived] = useState('');
-
+  console.log(product);
   const currentImagesList = useMemo(() => {
-    return (product as ProductType)?.images.slice(...currentImagesIndex);
+    if (!product) return [];
+    return product.images.slice(...currentImagesIndex);
   }, [product, currentImagesIndex]);
 
   const addToCartMutation = useMutation({
@@ -140,13 +167,15 @@ export default function ProductDetail() {
     });
   };
 
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading product</div>;
   if (!product) return null;
 
   return (
     // Todo: giao diện chi tiết sản phẩm
     <div className='relative bg-gray-100 py-3'>
       <Helmet>
-        <title>{product.name}</title>
+        <title>{product.nameProduct}</title>
         <meta
           name='description'
           content={convert(product.description || '', {
@@ -167,7 +196,7 @@ export default function ProductDetail() {
             >
               <img
                 src={imageActived}
-                alt={product.name}
+                alt={product.nameProduct}
                 className='absolute left-0 top-0 h-full w-full  bg-white object-cover'
                 ref={imageRef}
               />
@@ -190,7 +219,7 @@ export default function ProductDetail() {
                 </svg>
               </button>
 
-              {currentImagesList.map((image) => {
+              {currentImagesList.map((image: string) => {
                 const isActive = image === imageActived;
 
                 return (
@@ -226,7 +255,7 @@ export default function ProductDetail() {
           </div>
 
           <div className='col-span-7'>
-            <h1 className='text-xl font-medium uppercase'>{product.name}</h1>
+            <h1 className='text-xl font-medium uppercase'>{product.nameProduct}</h1>
             <div className='my-4 flex items-center'>
               <div className='flex items-center gap-1'>
                 <span className='mt-1 text-orange underline'>{product.rating}</span>
@@ -240,18 +269,18 @@ export default function ProductDetail() {
               <div className='mx-4 h-6 w-[1px] bg-gray-300' />
 
               <div>
-                <span>{formatNumberToSocialStyle(product.sold)}</span>
+                <span>{formatNumberToSocialStyle(product.soldQuantity)}</span>
                 <span className='ml-1 text-sm capitalize text-gray-500'>{t('sold')}</span>
               </div>
             </div>
 
             <div className='flex items-center bg-gray-100 px-6 py-4'>
-              <span className='text-gray-500 line-through'>₫{formatCurrency(product.price_before_discount)}</span>
+              <span className='text-gray-500 line-through'>₫{formatCurrency(product.price)}</span>
 
               <div className='ml-3 text-3xl text-orange'>₫{formatCurrency(product.price)}</div>
 
               <div className='ml-5 rounded-sm bg-orange px-1 text-sm font-semibold uppercase text-white'>
-                <span>{saleRate(product.price_before_discount, product.price)} </span>
+                <span>{saleRate(Number(product.price), Number(product.price))} </span>
                 {t('off')}
               </div>
             </div>
@@ -320,9 +349,18 @@ export default function ProductDetail() {
           <div>
             <div className='uppercase text-gray-500'>{t('you may also like')}</div>
             <div className='mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6'>
-              {productList.data.data.products.map((product) => (
-                <Product key={product._id} product={product} />
-              ))}
+
+{products?.map((product) => (
+                            <Product 
+                              key={product.id} 
+                              product={{
+                                ...product,
+                                priceBeforeDiscount: product.price,
+                                soldQuantity: product.soldQuantity,
+                                rating: 5
+                              }}
+                            />
+                        ))}
             </div>
           </div>
         )}

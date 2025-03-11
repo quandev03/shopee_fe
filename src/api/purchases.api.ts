@@ -2,14 +2,14 @@ import { ProductCart, PurchaseListStatus, Purchases } from 'src/@types/purchases
 import { ResponseSuccessType } from 'src/@types/utils.type';
 import api from './api';
 
-const URL = '/purchases';
+const URL = '/cart-order';
 
 export const purchasesApi = {
   getPurchases: (params: { status: PurchaseListStatus }) => {
-    return api.get<ResponseSuccessType<Purchases[]>>(URL, { params });
+    return api.get<ResponseSuccessType<any[]>>(URL + "/get-data-cart");
   },
   addToCart: (body: ProductCart) => {
-    return api.post<ResponseSuccessType<Purchases>>(`${URL}/add-to-cart`, body);
+    return api.post<ResponseSuccessType<Purchases>>(`${URL}/add-product-in-cart?productId=${body.product_id}&quantity=${body.buy_count}`);
   },
   updatePurchases: (body: ProductCart) => {
     return api.put<ResponseSuccessType<Purchases>>(`${URL}/update-purchase`, body);

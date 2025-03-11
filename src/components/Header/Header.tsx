@@ -83,7 +83,7 @@ export default function Header() {
                     {productInCartData.slice(0, MAX_PRODUCTS_SHOW).map((product) => (
                       <div className='grid grid-cols-6 items-start gap-4 p-2 hover:bg-slate-100' key={product._id}>
                         <div className='col-span-1 h-fit w-fit'>
-                          <img src={product.product.image} alt={product.product.name} className='w-full object-cover' />
+                          <img src={product.product.images[0]} alt={product.product.name} className='w-full object-cover' />
                         </div>
                         <div className='col-span-4 mr-5'>
                           <div className='truncate'>{product.product.name} </div>
