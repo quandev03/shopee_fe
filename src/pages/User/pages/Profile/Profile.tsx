@@ -209,7 +209,7 @@ export default function Profile() {
             <div className='col-span-12 md:col-span-8'>
               <div className='flex flex-col flex-wrap sm:flex-row'>
                 <div className='text-gray-500 sm:w-[20%] sm:text-right '>Email</div>
-                <div className='sm:w-[80%] sm:pl-5'>{profile?.email}</div>
+                <div className='sm:w-[80%] sm:pl-5'>{profile?.username}</div>
               </div>
               <Info />
               <div className='flex flex-col flex-wrap sm:mt-2 sm:flex-row'>

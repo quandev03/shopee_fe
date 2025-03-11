@@ -2,7 +2,7 @@ import { ResponseSuccessType } from 'src/@types/utils.type';
 import api from './api';
 import { Category } from 'src/@types/category.type';
 
-export const URL = '/categories';
+export const URL = 'product/get-list-category';
 
 export const categoryApi = {
   getAll: () => {

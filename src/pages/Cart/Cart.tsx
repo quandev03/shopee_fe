@@ -12,8 +12,8 @@ import QuantityController from 'src/components/QuantityController';
 import { path } from 'src/constants/path';
 import { purchasesStatus } from 'src/constants/purchases';
 import { AppContext } from 'src/contexts/app.context';
-import { ProductListConfig } from 'src/@types/product.type';
-import { ProductCart, Purchases } from 'src/@types/purchases.type';
+import {ProductListConfig, ProductType} from 'src/@types/product.type';
+import {ProductCart, Purchases, PurchaseStatus} from 'src/@types/purchases.type';
 import { formatCurrency, formatNumberToSocialStyle, generateNameId, randomInteger } from 'src/utils/utils';
 import Product from '../ProductList/components/Product';
 import { Helmet } from 'react-helmet-async';
@@ -27,7 +27,7 @@ export default function Cart() {
 
   const queryClient = useQueryClient();
 
-  const queryConfig: ProductListConfig = { page: randomPage, limit: '12' };
+  const queryConfig: ProductListConfig = { page: randomPage, size: '12' };
 
   const location = useLocation();
 
@@ -70,8 +70,37 @@ export default function Cart() {
       });
     }
   });
+  const tempotery= purchasesData?.data;
+  console.log(tempotery)
 
-  const productInCartData = purchasesData?.data.data;
+  const productInCartData = useMemo(() => {
+    return purchasesData?.data.map((cart: any) => ({
+      _id: cart.id,
+      buy_count: cart.quantity,
+      price: cart.product.price,
+      price_before_discount: cart.product.price,
+      status: false,
+      user: null,
+      product: {
+        _id: cart.product.id,
+        buy_count: cart.quantity,
+        nameProduct: cart.product.nameProduct,
+        description: cart.product.description,
+        price: cart.product.price,
+        quantity: cart.product.quality,
+        soldQuantity: cart.product.soldQuantity,
+        viewedQuantity: cart.product.viewedQuantity,
+        images: cart.product.images, // Nếu có nhiều hình ảnh, có thể là mảng
+        image: cart.product.image, // Nếu không có ảnh, có thể là null
+        category: cart.product.category
+      },
+      createdAt: undefined,
+      updatedAt: undefined
+    })) || [];
+  }, [purchasesData]);
+
+  console.log("data purchase:", productInCartData)
+
   const isCheckAllPurchase = useMemo(() => extendsPurchases.every((purchase) => purchase.checked), [extendsPurchases]);
   const checkedPurchases = useMemo(() => extendsPurchases.filter((purchase) => purchase.checked), [extendsPurchases]);
   const checkedPurchasesCount = checkedPurchases.length;
@@ -86,27 +115,22 @@ export default function Cart() {
   const totalCheckedPurchaseSavingPrice = useMemo(
     () =>
       checkedPurchases.reduce((total, purchase) => {
-        return total + (purchase.product.price_before_discount - purchase.product.price) * purchase.buy_count;
+        return total + (purchase.product.price) * purchase.buy_count;
       }, 0),
     [checkedPurchases]
   );
 
   useEffect(() => {
     setExtendsPurchases((prev) => {
-      const purchasesObject = keyBy(prev, '_id');
-      return (
-        productInCartData?.map((purchase) => {
-          const isChosenPurchase = purchaseChosenFromProductDetail === purchase._id;
-
-          return {
-            ...purchase,
-            checked: isChosenPurchase || Boolean(purchasesObject[purchase._id]?.checked),
-            disabled: false
-          };
-        }) || []
-      );
+      const purchasesObject = keyBy(prev, 'id');
+      return productInCartData?.map((purchase:Purchases) => ({
+        ...purchase,
+        checked: purchaseChosenFromProductDetail === purchase._id || Boolean(purchasesObject[purchase._id]?.checked),
+        disabled: false,
+      })) || [];
     });
-  }, [productInCartData, purchaseChosenFromProductDetail, setExtendsPurchases]);
+  }, [productInCartData, purchaseChosenFromProductDetail]);
+  console.log("extendsPurchases: ", extendsPurchases)
 
   useEffect(() => {
     return () => {
@@ -146,7 +170,7 @@ export default function Cart() {
 
     updatePurchaseMutation.mutate({
       buy_count: value,
-      product_id: extendsPurchases[productIndex].product._id
+      product_id: extendsPurchases[productIndex].product.id
     });
   };
 
@@ -171,7 +195,7 @@ export default function Cart() {
 
   const handleBuyProduct = () => {
     const listProduct: ProductCart[] = checkedPurchases.map((purchase) => ({
-      product_id: purchase.product._id,
+      product_id: purchase.product.id,
       buy_count: purchase.buy_count
     }));
 
@@ -231,21 +255,21 @@ export default function Cart() {
                           <div className='flex'>
                             <Link
                               to={`${path.home}${generateNameId({
-                                name: purchase.product.name,
-                                id: purchase.product._id
+                                name: purchase.product.nameProduct,
+                                id: purchase.product.id
                               })}`}
                               className='h-20 w-20 flex-shrink-0'
                             >
-                              <img src={purchase.product.image} alt={purchase.product.name} />
+                              <img src={purchase.product.image} alt={purchase.product.nameProduct} />
                             </Link>
                             <Link
                               to={`${path.home}${generateNameId({
-                                name: purchase.product.name,
-                                id: purchase.product._id
+                                name: purchase.product.nameProduct,
+                                id: purchase.product.id
                               })}`}
                               className='ml-4 line-clamp-2 flex-grow'
                             >
-                              {purchase.product.name}
+                              {purchase.product.nameProduct }
                             </Link>
                           </div>
                         </div>
@@ -259,7 +283,7 @@ export default function Cart() {
                             <div className='max-w-[50%] truncate text-gray-500 line-through'>
                               <span>₫</span>
                               <span className='text-sm text-gray-500'>
-                                {formatCurrency(purchase.product.price_before_discount)}
+                                {formatCurrency(purchase.product.price)}
                               </span>
                             </div>
 
@@ -404,11 +428,11 @@ export default function Cart() {
               </Link>
             </div>
 
-            <div className='mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6'>
-              {productRelateList.products.map((product) => (
-                <Product key={product._id} product={product} />
-              ))}
-            </div>
+            {/*<div className='mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6'>*/}
+            {/*  {productRelateList.products.map((product) => (*/}
+            {/*    <Product key={product._id} product={product} />*/}
+            {/*  ))}*/}
+            {/*</div>*/}
           </>
         )}
       </div>
