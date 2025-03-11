@@ -1,6 +1,6 @@
-import React, { Fragment, useRef } from 'react';
-import { toast } from 'react-toastify';
-import config from 'src/constants/config';
+import React, { Fragment, useRef } from "react";
+import { toast } from "react-toastify";
+import config from "src/constants/config";
 
 interface Props {
   onChange?: (file?: File) => void;
@@ -14,10 +14,11 @@ export default function InputAvatar({ onChange }: Props) {
 
     if (
       imageFromInput &&
-      (imageFromInput.size >= config.maxSizeUploadAvatar || !imageFromInput.type.includes('image'))
+      (imageFromInput.size >= config.maxSizeUploadAvatar ||
+        !imageFromInput.type.includes("image"))
     ) {
-      toast.error('Dụng lượng file tối đa 1 MB, Định dạng:.JPEG, .PNG', {
-        autoClose: 2000
+      toast.error("Dụng lượng file tối đa 1 MB, Định dạng:.JPEG, .PNG", {
+        autoClose: 2000,
       });
     } else {
       onChange && onChange(imageFromInput);
@@ -31,9 +32,9 @@ export default function InputAvatar({ onChange }: Props) {
   return (
     <Fragment>
       <input
-        className='hidden'
-        type='file'
-        accept='.jpg,.jpeg,.png'
+        className="hidden"
+        type="file"
+        accept=".jpg,.jpeg,.png"
         ref={uploadImageRef}
         onChange={changeImage}
         onClick={(event) => {
@@ -43,8 +44,8 @@ export default function InputAvatar({ onChange }: Props) {
       />
 
       <button
-        type='button'
-        className='mx-auto mb-3 w-[100px] rounded-sm border border-gray-200 bg-white py-2 text-center capitalize'
+        type="button"
+        className="mx-auto mb-3 w-[100px] rounded-sm border border-gray-200 bg-white py-2 text-center capitalize"
         onClick={handleUpload}
       >
         Chọn ảnh

@@ -1,14 +1,8 @@
-type Role = 'Admin' | 'User';
+type Role = "Admin" | "User";
 
 export interface User {
+  id: string | undefined;
+  username: string;
   roles: Role[];
-  _id: string;
-  email: string;
-  name?: string;
-  date_of_birth?: string;
-  address?: string;
-  phone?: string;
   avatar?: string;
-  createdAt: string;
-  updatedAt: string;
 }

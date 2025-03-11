@@ -1,16 +1,16 @@
-import { createSearchParams, useNavigate } from 'react-router-dom';
-import NonStarFilled from 'src/components/Star/NonStarFilled';
-import StarFilled from 'src/components/Star/StarFilled';
-import { path } from 'src/constants/path';
-import { QueryConfig } from 'src/hooks/useQueryConfig';
-import { useTranslation } from 'react-i18next';
+import { createSearchParams, useNavigate } from "react-router-dom";
+import NonStarFilled from "src/components/Star/NonStarFilled";
+import StarFilled from "src/components/Star/StarFilled";
+import { path } from "src/constants/path";
+import { QueryConfig } from "src/hooks/useQueryConfig";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   queryConfig: QueryConfig;
 }
 
 export default function RatingStar({ queryConfig }: Props) {
-  const { t } = useTranslation('home');
+  const { t } = useTranslation("home");
 
   const navigate = useNavigate();
 
@@ -19,9 +19,9 @@ export default function RatingStar({ queryConfig }: Props) {
       pathname: path.home,
       search: createSearchParams({
         ...queryConfig,
-        page: '1',
-        rating_filter: ratingFilter.toString()
-      }).toString()
+        page: "1",
+        rating_filter: ratingFilter.toString(),
+      }).toString(),
     });
   };
 
@@ -30,12 +30,15 @@ export default function RatingStar({ queryConfig }: Props) {
       {Array(5)
         .fill(0)
         .map((_, index) => (
-          <li className='mt-4 flex cursor-pointer items-center gap-2' key={index}>
+          <li
+            className="mt-4 flex cursor-pointer items-center gap-2"
+            key={index}
+          >
             <div
-              aria-hidden='true'
-              role='button'
+              aria-hidden="true"
+              role="button"
               tabIndex={0}
-              className='flex items-center gap-1'
+              className="flex items-center gap-1"
               onClick={() => handleRatingFilter(5 - index)}
             >
               {Array(5)
@@ -47,7 +50,7 @@ export default function RatingStar({ queryConfig }: Props) {
                   return <NonStarFilled key={indexStar} />;
                 })}
 
-              {index !== 0 && <span>{t('& up')}</span>}
+              {index !== 0 && <span>{t("& up")}</span>}
             </div>
           </li>
         ))}

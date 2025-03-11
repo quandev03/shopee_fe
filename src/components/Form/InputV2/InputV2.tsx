@@ -1,17 +1,24 @@
-import React, { InputHTMLAttributes, useState } from 'react';
-import { FieldPath, FieldValues, UseControllerProps, useController } from 'react-hook-form';
+import React, { InputHTMLAttributes, useState } from "react";
+import {
+  FieldPath,
+  FieldValues,
+  UseControllerProps,
+  useController,
+} from "react-hook-form";
 
-export interface InputNumberProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface InputNumberProps
+  extends InputHTMLAttributes<HTMLInputElement> {
   classNameInput?: string;
   classNameError?: string;
 }
 
-function InputV2<TFieldValues extends FieldValues, TName extends FieldPath<TFieldValues>>(
-  props: UseControllerProps<TFieldValues, TName> & InputNumberProps
-) {
+function InputV2<
+  TFieldValues extends FieldValues,
+  TName extends FieldPath<TFieldValues>
+>(props: UseControllerProps<TFieldValues, TName> & InputNumberProps) {
   const {
-    classNameInput = 'w-full rounded-sm border border-gray-300 p-3 shadow-sm outline-none focus:border-gray-500',
-    classNameError = 'mt-1 min-h-[1.25rem] text-red-500',
+    classNameInput = "w-full rounded-sm border border-gray-300 p-3 shadow-sm outline-none focus:border-gray-500",
+    classNameError = "mt-1 min-h-[1.25rem] text-red-500",
     className,
     onChange,
     type,
@@ -25,9 +32,11 @@ function InputV2<TFieldValues extends FieldValues, TName extends FieldPath<TFiel
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const valueFromInput = event.target.value;
 
-    const numberCondition = type === 'number' && (/^\d+$/.test(valueFromInput) || valueFromInput === '');
+    const numberCondition =
+      type === "number" &&
+      (/^\d+$/.test(valueFromInput) || valueFromInput === "");
 
-    if (type !== 'number' || numberCondition) {
+    if (type !== "number" || numberCondition) {
       //Cập nhật localValue
       setLocalValue(valueFromInput);
 

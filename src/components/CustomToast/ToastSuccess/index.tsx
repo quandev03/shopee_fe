@@ -1,3 +1,3 @@
-import ToastSuccess from './ToastSuccess';
+import ToastSuccess from "./ToastSuccess";
 
 export default ToastSuccess;

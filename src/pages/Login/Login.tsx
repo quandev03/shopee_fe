@@ -1,35 +1,65 @@
-import { Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { Schema, schema } from 'src/utils/rules';
-import Input from 'src/components/Form/Input';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useMutation } from '@tanstack/react-query';
-import { authApi } from 'src/api/auth.api';
-import { isAxiosErrorUnprocessableEntity } from 'src/utils/utils';
-import { ResponseErrorType } from 'src/@types/utils.type';
-import { useContext } from 'react';
-import { AppContext } from 'src/contexts/app.context';
-import Button from 'src/components/Button';
-import { Helmet } from 'react-helmet-async';
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { Schema, schema } from "src/utils/rules";
+import Input from "src/components/Form/Input";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useMutation } from "@tanstack/react-query";
+import { authApi } from "src/api/auth.api";
+import { isAxiosErrorUnprocessableEntity } from "src/utils/utils";
+import { ResponseErrorType } from "src/@types/utils.type";
+import { useContext } from "react";
+import { AppContext } from "src/contexts/app.context";
+import Button from "src/components/Button";
+import { Helmet } from "react-helmet-async";
+import {
+  setAccessTokenToLS,
+  setProfileToLS,
+  setRefreshTokenToLS,
+} from "../../utils/auth.ts";
 
-type FormData = Pick<Schema, 'email' | 'password'>;
+type FormData = {
+  username: string;
+  password: string;
+};
 
-const loginSchema = schema.pick(['email', 'password']);
+type BackendRole = "ROLE_ADMIN" | "ROLE_USER";
+type Role = "Admin" | "User";
+
+type AuthResponse = {
+  id: string;
+  username: string;
+  accessToken: string;
+  refreshToken: string;
+  roles: BackendRole | BackendRole[];
+  avatar: string | null;
+};
+
+const loginSchema = schema.pick(["username", "password"]);
+
+const mapBackendRolesToFrontend = (
+  backendRoles: BackendRole | BackendRole[]
+): Role[] => {
+  const rolesArray = Array.isArray(backendRoles)
+    ? backendRoles
+    : [backendRoles];
+  return rolesArray.map((role) => (role === "ROLE_ADMIN" ? "Admin" : "User"));
+};
 
 export default function Login() {
+  const navigate = useNavigate();
   const {
     formState: { errors },
     register,
     handleSubmit,
-    setError
+    setError,
   } = useForm<FormData>({
-    resolver: yupResolver(loginSchema)
+    resolver: yupResolver(loginSchema),
   });
 
   const loginAccountMutation = useMutation({
     mutationFn: (body: FormData) => {
       return authApi.loginAccount(body);
-    }
+    },
   });
 
   const { setIsAuthenticated, setProfile } = useContext(AppContext);
@@ -37,27 +67,51 @@ export default function Login() {
   const onSubmit = handleSubmit((data) => {
     loginAccountMutation.mutate(data, {
       onSuccess: (result) => {
-        //set token and refresh token into LS
+        console.log("API Response Login:", result);
+        console.log(result);
+        if (!result || !result.data) {
+          console.error("Invalid API response:", result);
+          return Promise.reject(new Error("Invalid API response"));
+        }
+        const id: any = result.data.id;
+        const username: string = result.data.username;
+        const accessToken: string = result.data.accessToken;
+        const refreshToken: string = result.data.refreshToken;
+        const roles: BackendRole | BackendRole[] = result.data.roles;
+        const avatar: string | null = result.data.avatar;
+        const formattedRoles: Role[] = mapBackendRolesToFrontend(roles);
 
-        const { access_token, user } = result.data.data;
+        // Lưu accessToken và refreshToken vào localStorage
+        setAccessTokenToLS(accessToken);
+        setRefreshTokenToLS(refreshToken);
+        setProfileToLS({ id, username, roles: formattedRoles, avatar });
 
-        setIsAuthenticated(Boolean(access_token));
-        setProfile(user);
+        setIsAuthenticated(Boolean(accessToken));
+        setProfile({
+          id,
+          username,
+          roles: formattedRoles,
+          avatar: avatar ?? undefined,
+        });
+
+        // Điều hướng về trang chủ
+        navigate("/");
       },
       onError: (error) => {
-        if (isAxiosErrorUnprocessableEntity<ResponseErrorType<FormData>>(error)) {
+        if (
+          isAxiosErrorUnprocessableEntity<ResponseErrorType<FormData>>(error)
+        ) {
           const formError = error.response?.data.data;
-
           if (formError) {
             Object.keys(formError).forEach((key) => {
               setError(key as keyof FormData, {
                 message: formError[key as keyof FormData],
-                type: 'Server'
+                type: "Server",
               });
             });
           }
         }
-      }
+      },
     });
   });
 
@@ -65,51 +119,54 @@ export default function Login() {
     <div className='flex items-center bg-orange bg-contain lg:h-auth__hero lg:min-h-auth_hero lg:bg-[url("https://down-vn.img.susercontent.com/file/sg-11134004-7qvcy-lfuqe4hftedq21")] lg:bg-center lg:bg-no-repeat lg:py-10'>
       <Helmet>
         <title>Đăng nhập | Shopee Clone</title>
-        <meta name='description' content='Đăng nhập vào tài khoản shopee để bắt đầu mua sắm' />
+        <meta
+          name="description"
+          content="Đăng nhập vào tài khoản shopee để bắt đầu mua sắm"
+        />
       </Helmet>
-      <div className='container'>
-        <div className='grid grid-cols-1 lg:grid-cols-5'>
+      <div className="container">
+        <div className="grid grid-cols-1 lg:grid-cols-5">
           <form
-            className=' bg-white p-6 shadow-sm lg:col-span-2 lg:col-start-4'
+            className=" bg-white p-6 shadow-sm lg:col-span-2 lg:col-start-4"
             onSubmit={onSubmit}
             noValidate
-            name='login-form'
+            name="login-form"
           >
-            <div className='form__title text-xl lg:text-2xl'>Đăng nhập</div>
-            <div className='mt-3'>
+            <div className="form__title text-xl lg:text-2xl">Đăng nhập</div>
+            <div className="mt-3">
               <Input
-                name='email'
-                placeholder='Email'
-                errorMessage={errors.email?.message}
+                name="username"
+                placeholder="Username"
+                errorMessage={errors.username?.message}
                 register={register}
-                type='email'
+                type="email"
               />
             </div>
 
-            <div className='mt-2'>
+            <div className="mt-2">
               <Input
-                name='password'
-                type='password'
+                name="password"
+                type="password"
                 errorMessage={errors.password?.message}
-                placeholder='Password'
+                placeholder="Password"
                 register={register}
-                autoComplete='on'
-                classNameOpenEye='absolute right-[6px] top-[12px] h-5 w-5 cursor-pointer'
+                autoComplete="on"
+                classNameOpenEye="absolute right-[6px] top-[12px] h-5 w-5 cursor-pointer"
               />
             </div>
 
             <Button
               isLoading={loginAccountMutation.isLoading}
               disabled={loginAccountMutation.isLoading}
-              type='submit'
-              className='mt-5 flex w-full items-center justify-center rounded-sm bg-orange px-2 py-4 text-white'
+              type="submit"
+              className="mt-5 flex w-full items-center justify-center rounded-sm bg-orange px-2 py-4 text-white"
             >
               Đăng nhập
             </Button>
 
-            <div className='mt-8 flex justify-center'>
-              <span className='mr-1 text-gray-400'>Bạn chưa có tài khoản?</span>
-              <Link to='/register' className='text-orange'>
+            <div className="mt-8 flex justify-center">
+              <span className="mr-1 text-gray-400">Bạn chưa có tài khoản?</span>
+              <Link to="/register" className="text-orange">
                 Đăng ký
               </Link>
             </div>

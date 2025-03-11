@@ -1,6 +1,6 @@
-import React from 'react';
-import AuthHeader from 'src/components/AuthHeader';
-import Footer from 'src/components/Footer';
+import React from "react";
+import AuthHeader from "src/components/AuthHeader";
+import Footer from "src/components/Footer";
 
 interface Props {
   children?: React.ReactNode;

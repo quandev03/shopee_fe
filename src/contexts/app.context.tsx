@@ -1,7 +1,7 @@
-import React, { createContext, useState } from 'react';
-import { ExtendsPurchases } from 'src/@types/purchases.type';
-import { User } from 'src/@types/user.type';
-import { getAccessTokenFromLS, getProfileFromLS } from 'src/utils/auth';
+import React, { createContext, useState } from "react";
+import { ExtendsPurchases } from "src/@types/purchases.type";
+import { User } from "src/@types/user.type";
+import { getAccessTokenFromLS, getProfileFromLS } from "src/utils/auth";
 
 interface AppContextInterface {
   isAuthenticated: boolean;
@@ -20,7 +20,7 @@ export const getInitContext: () => AppContextInterface = () => ({
   setProfile: () => null,
   extendsPurchases: [],
   setExtendsPurchases: () => null,
-  clearData: () => null
+  clearData: () => null,
 });
 
 const initialContext: AppContextInterface = getInitContext();
@@ -29,14 +29,18 @@ export const AppContext = createContext<AppContextInterface>(initialContext);
 
 export default function AppProvider({
   children,
-  defaultContext = initialContext
+  defaultContext = initialContext,
 }: {
   children: React.ReactNode;
   defaultContext?: AppContextInterface;
 }) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(defaultContext.isAuthenticated);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    defaultContext.isAuthenticated
+  );
   const [profile, setProfile] = useState<User | null>(defaultContext.profile);
-  const [extendsPurchases, setExtendsPurchases] = useState<ExtendsPurchases[]>(defaultContext.extendsPurchases);
+  const [extendsPurchases, setExtendsPurchases] = useState<ExtendsPurchases[]>(
+    defaultContext.extendsPurchases
+  );
   const clearData = () => {
     setIsAuthenticated(false);
     setProfile(null);
@@ -52,7 +56,7 @@ export default function AppProvider({
         setProfile,
         extendsPurchases,
         setExtendsPurchases,
-        clearData
+        clearData,
       }}
     >
       {children}

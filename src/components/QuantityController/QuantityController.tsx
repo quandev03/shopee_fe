@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import InputNumber, { InputNumberProps } from '../Form/InputNumber';
+import { useState } from "react";
+import InputNumber, { InputNumberProps } from "../Form/InputNumber";
 
 interface Props extends InputNumberProps {
   max?: number;
@@ -17,7 +17,7 @@ export default function QuantityController({
   onFocusOut,
   max,
   value,
-  classNameWrapper = 'ml-10',
+  classNameWrapper = "ml-10",
   ...rest
 }: Props) {
   const [localValue, setLocalValue] = useState<number>(Number(value || 1));
@@ -64,18 +64,24 @@ export default function QuantityController({
 
   return (
     <div className={`flex items-center ${classNameWrapper}`}>
-      <button className='border-1 h-8 w-8 border border-r-0 text-xl text-gray-500 outline-none' onClick={decrease}>
+      <button
+        className="border-1 h-8 w-8 border border-r-0 text-xl text-gray-500 outline-none"
+        onClick={decrease}
+      >
         -
       </button>
       <InputNumber
-        classNameError='hidden'
-        classNameInput='border-1 text w-[4rem] border px-2 h-8 text-center'
+        classNameError="hidden"
+        classNameInput="border-1 text w-[4rem] border px-2 h-8 text-center"
         value={value || localValue}
         onChange={handleChangeInput}
         onBlur={handleBlurInput}
         {...rest}
       />
-      <button className='border-1 h-8 w-8 border border-l-0 text-xl text-gray-500 outline-none' onClick={increase}>
+      <button
+        className="border-1 h-8 w-8 border border-l-0 text-xl text-gray-500 outline-none"
+        onClick={increase}
+      >
         +
       </button>
     </div>

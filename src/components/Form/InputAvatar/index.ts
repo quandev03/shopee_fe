@@ -1,3 +1,3 @@
-import InputAvatar from './InputAvatar';
+import InputAvatar from "./InputAvatar";
 
 export default InputAvatar;

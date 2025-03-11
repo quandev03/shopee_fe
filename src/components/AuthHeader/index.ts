@@ -1,3 +1,3 @@
-import AuthHeader from './AuthHeader';
+import AuthHeader from "./AuthHeader";
 
 export default AuthHeader;
