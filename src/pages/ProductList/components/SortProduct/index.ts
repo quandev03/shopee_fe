@@ -1,3 +1,3 @@
-import SortProduct from './SortProduct';
+import SortProduct from "./SortProduct";
 
 export default SortProduct;

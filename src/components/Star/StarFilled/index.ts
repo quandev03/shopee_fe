@@ -1,3 +1,3 @@
-import StarFilled from './StarFilled';
+import StarFilled from "./StarFilled";
 
 export default StarFilled;

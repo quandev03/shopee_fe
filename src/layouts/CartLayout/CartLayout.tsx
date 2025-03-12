@@ -1,6 +1,6 @@
-import React, { Fragment } from 'react';
-import CartHeader from 'src/components/CartHeader';
-import Footer from 'src/components/Footer';
+import React, { Fragment } from "react";
+import CartHeader from "src/components/CartHeader";
+import Footer from "src/components/Footer";
 
 interface Props {
   children: React.ReactNode;
