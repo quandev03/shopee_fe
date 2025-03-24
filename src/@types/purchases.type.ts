@@ -1,8 +1,8 @@
-import { Product } from './product.type';
+import { ProductType} from './product.type';
 
-export type PurchaseStatus = -1 | 1 | 2 | 3 | 4 | 5;
+export type PurchaseStatus = -1 | 1 | 2 | 3 | 4 | 5 | 6|7;
 
-export type PurchaseListStatus = 0 | PurchaseStatus;
+export type PurchaseListStatus = 7 | PurchaseStatus;
 
 export type ProductCart = {
   product_id: string;
@@ -16,7 +16,7 @@ export interface Purchases {
   price_before_discount: number;
   status: PurchaseStatus;
   user: string;
-  product: Product;
+  product: ProductType;
   createdAt: string;
   updatedAt: string;
 }

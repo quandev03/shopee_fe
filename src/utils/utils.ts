@@ -42,9 +42,9 @@ export const saleRate = (oldPrice: number, salePrice: number) => {
   return rating + '%';
 };
 
-const removeSpecialCharacter = (str: string) =>
-  // eslint-disable-next-line no-useless-escape
-  str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g, '');
+const removeSpecialCharacter = (str: string = '') =>
+    // eslint-disable-next-line no-useless-escape
+    str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g, '');
 
 export const generateNameId = ({ name, id }: { name: string; id: string }) => {
   return removeSpecialCharacter(name).replaceAll(/\s/g, '-') + `-i-${id}`;

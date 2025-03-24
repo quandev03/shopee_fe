@@ -3,7 +3,7 @@ type Role = 'Admin' | 'User';
 export interface User {
   roles: Role[];
   _id: string;
-  email: string;
+  username: string;
   name?: string;
   date_of_birth?: string;
   address?: string;

@@ -1,4 +1,4 @@
-export interface Product {
+export interface ProductType {
   _id: string;
   images: string[];
   price: number;
@@ -19,7 +19,7 @@ export interface Product {
 }
 
 export interface ProductList {
-  products: Product[];
+  products: ProductType[];
   pagination: {
     page: number;
     limit: number;
@@ -29,13 +29,31 @@ export interface ProductList {
 
 export interface ProductListConfig {
   page?: number | string;
-  limit?: number | string;
+  size?: number | string;
   order?: 'desc' | 'asc';
-  sort_by?: 'createdAt' | 'view' | 'sold' | 'price';
+  sorty?: 'createdAt' | 'view' | 'sold' | 'price';
   category?: string;
   exclude?: string;
-  rating_filter?: number | string;
-  price_max?: number | string;
-  price_min?: number | string;
-  name?: string;
+  rating?: number | string;
+  priceMax?: number | string;
+  priceMin?: number | string;
+  nameProduct?: string;
+}
+export interface Category {
+  id: string;
+  name: string;
+}
+
+export interface ProductResponse {
+  id: string;
+  nameProduct: string;
+  description: string;
+  price: number;
+  quantity: number;
+  soldQuantity: number;
+  viewedQuantity: number;
+  images: string[] | null; // Nếu có nhiều hình ảnh, có thể là mảng; nếu không có, có thể là null
+  image: string;
+  category: Category;
+  rating:number|null
 }

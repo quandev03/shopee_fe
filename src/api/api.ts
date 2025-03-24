@@ -13,133 +13,176 @@ import {
 import { URL_LOGIN, URL_LOGOUT, URL_REFRESH_TOKEN, URL_REGISTER } from './auth.api';
 import { isAxiosErrorUnauthorized, isExpiredTokenError } from 'src/utils/utils';
 import { ResponseErrorType } from 'src/@types/utils.type';
+import { accessToken } from "../msw/auth.msw.ts";
+import * as jwt_decode from "jwt-decode";
+import { User } from "../@types/user.type.ts";
 
+type Role = 'Admin' | 'User';
+interface JwtPayload {
+  exp: number;
+  iat: number;
+  [key: string]: any;  // Các trường khác trong token
+}
+
+// Hàm kiểm tra xem token đã hết hạn chưa
+function isTokenExpired(token: string): boolean {
+  try {
+    const decoded: JwtPayload = jwt_decode.jwtDecode(token);
+    console.log(decoded)
+    const currentTime = Math.floor(Date.now() / 1000); // Lấy thời gian hiện tại tính bằng giây
+
+    // Kiểm tra nếu thời gian hết hạn < thời gian hiện tại
+    return decoded.exp < currentTime;
+  } catch (error) {
+    // Nếu giải mã không thành công (token không hợp lệ)
+    console.error("Invalid token", error);
+    return true;
+  }
+}
 export class Http {
   instance: AxiosInstance;
   private accessToken: string;
   private refreshToken: string;
   private refreshTokenRequest: Promise<string> | null;
+
+  private mapBackendRoleToFrontend = (backendRoles: string | string[]): Role[] => {
+    if (typeof backendRoles === 'string') {
+      return backendRoles === 'ROLE_ADMIN' ? ['Admin'] : ['User'];
+    }
+    return backendRoles.map((role) => {
+      if (role === 'ROLE_ADMIN') return 'Admin';
+      if (role === 'ROLE_USER') return 'User';
+      return role as Role;
+    });
+  };
+
   constructor() {
-    this.accessToken = getAccessTokenFromLS(); //Khởi tạo 1 lần duy nhất và lưu access_token vào trong ram
-    this.refreshToken = getRefreshTokenFromLS(); //Khởi tạo 1 lần duy nhất và lưu access_token vào trong ram
+    this.accessToken = getAccessTokenFromLS();
+    this.refreshToken = getRefreshTokenFromLS();
     this.refreshTokenRequest = null;
     this.instance = axios.create({
       baseURL: config.baseUrl,
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
-        'expire-access-token': 5, //5 giây
-        'expire-refresh-token': 60 * 60 // 1 giờ
-      }
+        'expire-access-token': 5,
+        'expire-refresh-token': 60 * 60,
+      },
     });
 
     this.instance.interceptors.request.use(
-      (config) => {
-        if (this.accessToken && config.headers) {
-          config.headers.Authorization = this.accessToken;
-          /**
-           * Lấy accessToken từ đối thượng HTTP tức là lấy dữ liệu từ RAM
-           * Lấy accessToken từ localStorage tức là lấy dữ liệu từ ROM
-           * ==> lấy từ RAM sẽ cho tốc độ tải dữ liệu nhanh hơn lấy từ ROM
-           */
-        }
-        return config;
-      },
-      (error) => {
-        return Promise.reject(error);
-      }
+        (config) => {
+
+          const noAuthRequired = config.url?.includes('/login') ||
+              config.url?.includes('/register') ||
+              config.url?.includes('get-list') ||
+              config.url?.includes('dataProduct') ||
+              config.url?.includes('/refresh-token')
+          ;
+
+          if (this.accessToken && config.headers && !noAuthRequired) {
+            config.headers.Authorization = `Bearer ${this.accessToken}`;
+          }
+          return config;
+        },
+        (error) => Promise.reject(error)
     );
 
     this.instance.interceptors.response.use(
-      (response) => {
-        // console.log(response);
-        const { url } = response.config;
+        (response) => {
+          const { url } = response.config;
 
-        if (url === URL_LOGIN || url === URL_REGISTER) {
-          const result = response.data as AuthResponse;
+          if (url === URL_LOGIN || url === URL_REGISTER) {
+            const result = response.data;
+            let access: string = result.accessToken;
+            let refresh: string = result.refreshToken;
+            let user: User = {
+              roles: this.mapBackendRoleToFrontend(result.roles),
+              _id: result.id,
+              username: result.username,
+              name: result.username,
+              avatar: result.avatar,
+              createdAt: "string",
+              updatedAt: "",
+            };
+            this.accessToken = access;
+            this.refreshToken = refresh;
+            setAccessTokenToLS(access);
+            setRefreshTokenToLS(refresh);
+            setProfileToLS(user);
+          } else if (url === URL_LOGOUT) {
+            this.accessToken = '';
+            this.refreshToken = '';
+            clearLS();
+          }
+          return response;
+        },
+        (error: AxiosError) => {
+          if (![HttpStatusCode.UnprocessableEntity, HttpStatusCode.Unauthorized].includes(error.response?.status as number)) {
+            const data: any = error.response?.data;
+            const message = data?.message || error.message;
+            toast.error(message);
+          console.log(message)
+          }
+          console.log(error)
 
-          const { access_token, user, refresh_token } = result.data;
-          this.accessToken = access_token;
-          this.refreshToken = refresh_token;
-          setAccessTokenToLS(access_token);
-          setRefreshTokenToLS(refresh_token);
-          setProfileToLS(user);
-        } else if (url === URL_LOGOUT) {
-          this.accessToken = '';
-          this.refreshToken = '';
-          clearLS();
-        }
+          if (error.status==403 && !isTokenExpired(getRefreshTokenFromLS())) {
+            const config = error.response?.config || ({ headers: {} } as InternalAxiosRequestConfig);
+            const { url } = config;
+            console.log(config)
 
-        return response;
-      },
-      (error: AxiosError) => {
-        //Chỉ toast những lỗi không liên quan 422 và 401
-        if (
-          ![HttpStatusCode.UnprocessableEntity, HttpStatusCode.Unauthorized].includes(error.response?.status as number)
-        ) {
-          const data: any = error.response?.data;
-          const message = data?.message || error.message;
-          toast.error(message);
-        }
+            // Nếu token hết hạn, tiến hành refresh token
+            if (url !== URL_REFRESH_TOKEN) {
+              console.log('Refreshing token...');
+              this.refreshTokenRequest = this.refreshTokenRequest
+                  ? this.refreshTokenRequest
+                  : this.handleRefreshToken()?.finally(() => {
+                    // Đảm bảo chỉ gọi refreshTokenRequest một lần trong vòng 3 giây
+                    setTimeout(() => {
+                      this.refreshTokenRequest = null;
+                    }, 3000);
+                  });
 
-        //Lỗi 401 có nhiều trường hợp
-        // - trường hợp không truyền lên access_token
-        // - trường hợp truyền lên access_token không đúng
-        // - trường hợp refresh_token hết hạn
-        // - trường hợp truyền lên access_token hết hạn ==> tiến hành xử lý refresh_token
 
-        if (isAxiosErrorUnauthorized<ResponseErrorType<{ name: string; message: string }>>(error)) {
-          const config = error.response?.config || ({ headers: {} } as InternalAxiosRequestConfig);
+              return this.refreshTokenRequest?.then((access_token) => {
+                console.log('New access token:', access_token);
+                if (config?.headers) {
+                  return this.instance({
+                    ...config,
+                    headers: { ...config.headers, Authorization: `Bearer ${access_token}` },
+                  });
+                }
+              });
+            }
 
-          const { url } = config;
-          //Trường hợp token hết hạn và request truyền đi không phải là api gọi refresh token
-          if (isExpiredTokenError(error) && url !== URL_REFRESH_TOKEN) {
-            this.refreshTokenRequest = this.refreshTokenRequest
-              ? this.refreshTokenRequest
-              : this.handleRefreshToken()?.finally(() => {
-                  //Giữ refreshToken trong 3s tiếp theo để những request tiếp theo bị 401 thì vẫn dùng requestTokenRequest này
-                  //Và số giây giữ phải nhỏ hơn thời gian hết hạn của refreshToken
-                  setTimeout(() => {
-                    this.refreshTokenRequest = null;
-                  }, 3000);
-                });
-
-            return this.refreshTokenRequest?.then((access_token) => {
-              if (config?.headers) {
-                //Nghĩa là chúng ta tiếp tục gọi lại request củ vừa bị lỗi
-                return this.instance({ ...config, headers: { ...config.headers, Authorization: access_token } });
-              }
-            });
+            // Nếu refresh token cũng hết hạn, xóa toàn bộ token
+            // this.accessToken = '';
+            // this.refreshToken = '';
+            // clearLS();
+            // toast.error(error.response?.data?.message || 'Session expired. Please log in again.');
           }
 
-          //Còn những trường hợp như truyền sai token, token hết hạn và refreshToken cũng hết hạn thì toast message
-          // Và xóa toàn bộ token trong http và LS
-          this.accessToken = '';
-          this.refreshToken = '';
-          clearLS();
-          toast.error(error.response?.data.data?.message || error.response?.data.message);
+          return Promise.reject(error);
         }
-
-        return Promise.reject(error);
-      }
     );
   }
 
   private handleRefreshToken() {
+    console.log("Attempting to refresh token...");
     return this.instance
-      .post<RefreshTokenResponse>(URL_REFRESH_TOKEN, { refresh_token: this.refreshToken })
-      .then((res) => {
-        const { access_token } = res.data.data;
-        this.accessToken = access_token;
-        setAccessTokenToLS(access_token);
-        return access_token;
-      })
-      .catch(() => {
-        clearLS();
-        this.accessToken = '';
-        this.refreshToken = '';
-        throw new Error();
-      });
+        .post<RefreshTokenResponse>(URL_REFRESH_TOKEN, { refreshToken: this.refreshToken })
+        .then((res:any) => {
+          console.log(res)
+          this.accessToken = res.data;
+          setAccessTokenToLS(res.data);
+          return res.data;
+        })
+        .catch(() => {
+          clearLS();
+          this.accessToken = '';
+          this.refreshToken = '';
+          throw new Error('Unable to refresh token');
+        });
   }
 }
 

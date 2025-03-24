@@ -20,9 +20,9 @@ interface Props {
   categories: Category[];
 }
 
-type FormData = NoUndefinedField<Pick<Schema, 'price_max' | 'price_min'>>;
+type FormData = NoUndefinedField<Pick<Schema, 'priceMax' | 'priceMin'>>;
 
-const priceSchema = schema.pick(['price_min', 'price_max']);
+const priceSchema = schema.pick(['priceMin', 'priceMax']);
 
 export default function AsideFilter({ categories, queryConfig }: Props) {
   const { category } = queryConfig;
@@ -32,8 +32,8 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
 
   const { handleSubmit, formState, control, trigger } = useForm<FormData>({
     defaultValues: {
-      price_max: '',
-      price_min: ''
+      priceMax: '',
+        priceMin: ''
     },
     resolver: yupResolver(priceSchema)
   });
@@ -47,7 +47,7 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
             ...queryConfig,
             page: '1'
           },
-          ['rating_filter', 'category', 'price_min', 'price_max']
+          ['rating', 'category', 'priceMin', 'priceMax']
         )
       ).toString()
     });
@@ -59,8 +59,8 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
       search: createSearchParams({
         ...queryConfig,
         page: '1',
-        price_min: data.price_min,
-        price_max: data.price_max
+        priceMin: data.priceMin,
+        priceMax: data.priceMax
       }).toString()
     });
   });
@@ -157,14 +157,14 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
           <div className='mt-4 flex items-center gap-3'>
             <InputV2
               control={control}
-              name='price_min'
+              name='priceMin'
               placeholder={`₫ ${t('min')}`}
               type='number'
               className='flex items-center'
               classNameInput='w-full rounded-sm border border-gray-300 shadow-sm outline-none px-2 py-1'
               classNameError='hidden'
               onChange={() => {
-                trigger('price_max');
+                trigger('priceMax');
               }}
             />
 
@@ -189,7 +189,7 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
             /> */}
             <Controller
               control={control}
-              name='price_max'
+              name='priceMax'
               render={({ field }) => {
                 return (
                   <InputNumber
@@ -200,7 +200,7 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
                     {...field}
                     onChange={(event) => {
                       field.onChange(event);
-                      trigger('price_min');
+                      trigger('priceMin');
                     }}
                   />
                 );
@@ -208,7 +208,7 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
             />
           </div>
 
-          <div className='my-1 min-h-[1.25rem] text-center text-red-500'>{formState.errors.price_min?.message}</div>
+          <div className='my-1 min-h-[1.25rem] text-center text-red-500'>{formState.errors.priceMin?.message}</div>
 
           <Button
             className='w-full rounded-sm border-none bg-orange px-3 py-2 uppercase text-white shadow-sm focus:bg-orange/80'
