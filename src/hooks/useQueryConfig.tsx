@@ -1,29 +1,19 @@
-import isUndefined from 'lodash/isUndefined';
-import omitBy from 'lodash/omitBy';
-import { ProductListConfig } from 'src/@types/product.type';
-import { useQueryParams } from './useQueryParams';
-
-export type QueryConfig = {
-  [key in keyof ProductListConfig]: string;
-};
+import { useSearchParams } from 'react-router-dom';  // Use correct import
 
 export default function useQueryConfig() {
-  const queryParams: QueryConfig = useQueryParams();
-  const queryConfig: QueryConfig = omitBy(
-    {
-      page: queryParams.page || '1',
-      limit: queryParams.size || '20',
-      category: queryParams.category,
-      exclude: queryParams.exclude,
-      name: queryParams.name,
-      order: queryParams.order,
-      price_max: queryParams.price_max,
-      price_min: queryParams.price_min,
-      rating_filter: queryParams.rating_filter,
-      sort_by: queryParams.sort_by
-    },
-    isUndefined
-  );
+    const [searchParams] = useSearchParams();  // This will give you the query parameters
+    const queryConfig = {
+        page: searchParams.get('page') || '1',
+        limit: searchParams.get('limit') || '10',
+        category: searchParams.get('category'),
+        exclude: searchParams.get('exclude'),
+        name: searchParams.get('nameProduct'),
+        order: searchParams.get('order'),
+        priceMax: searchParams.get('priceMax'),
+        priceMin: searchParams.get('priceMin'),
+        rating: searchParams.get('reting'),
+        sort_by: searchParams.get('sort_by')
+    };
 
-  return queryConfig;
+    return queryConfig;
 }

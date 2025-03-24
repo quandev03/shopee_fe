@@ -29,7 +29,9 @@ export default function NavHeader() {
   });
 
   const handleLogout = () => {
-    logoutMutation.mutate();
+    localStorage.clear();
+    location.reload();
+    // logoutMutation.mutate();
   };
 
   const changeLanguage = (lng: KeyLang) => {

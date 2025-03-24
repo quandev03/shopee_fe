@@ -1,15 +1,15 @@
+import { ProductType, ProductList, ProductListConfig } from 'src/@types/product.type';
 import api from './api';
-import {ProductListConfig, ProductList, ProductType} from 'src/@types/product.type';
+import { ResponseSuccessType } from 'src/@types/utils.type';
+
+export const URL = '/product';
 
 export const productApi = {
-  // API để lấy danh sách sản phẩm
-  getProductList: (queryConfig: ProductListConfig) => {
-    return api.get<ProductList>('/product/get-list', {
-    });
+  getProductList: (params: ProductListConfig) => {
+    return api.get<ResponseSuccessType<ProductList>>(URL+"/get-list", {params});
   },
 
-  // API để lấy chi tiết sản phẩm
   getProduct: (id: string) => {
-    return api.get<ProductType>(`/product/dataProduct?id=${id}`);
+    return api.get<ResponseSuccessType<any>>(`${URL}/dataProduct?id=${id}`);
   }
 };

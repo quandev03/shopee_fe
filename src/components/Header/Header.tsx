@@ -20,14 +20,12 @@ export default function Header() {
 
   const status = purchasesStatus.inCart;
 
-  const { data: purchasesData } = useQuery({
+  const { data: purchasesData, refetch } = useQuery({
     queryKey: ['purchasesCart', { status }],
-    queryFn: () => purchasesApi.getPurchases({ status }),
-    enabled: isAuthenticated,
-    retry: 0
+    queryFn: () => purchasesApi.getPurchases()
   });
 
-  const productInCartData = purchasesData?.data.data;
+  const productInCartData = purchasesData?.data;
 
   return (
     <header className='bg-orange'>
@@ -75,18 +73,18 @@ export default function Header() {
           <Popover
             className='col-span-1'
             renderPopover={
-              productInCartData && productInCartData.length && isAuthenticated ? (
+              productInCartData && productInCartData?.length && isAuthenticated ? (
                 <div className='max-w-[400px] py-2 text-sm'>
                   <div className='mx-3 mb-2 capitalize text-gray-400'>sản phẩm mới thêm</div>
 
                   <div>
-                    {productInCartData.slice(0, MAX_PRODUCTS_SHOW).map((product) => (
+                    {productInCartData?.slice(0, MAX_PRODUCTS_SHOW).map((product) => (
                       <div className='grid grid-cols-6 items-start gap-4 p-2 hover:bg-slate-100' key={product._id}>
                         <div className='col-span-1 h-fit w-fit'>
-                          <img src={product.product.images[0]} alt={product.product.name} className='w-full object-cover' />
+                          <img src={product.product.image} alt={product.product.nameProduct} className='w-full object-cover' />
                         </div>
                         <div className='col-span-4 mr-5'>
-                          <div className='truncate'>{product.product.name} </div>
+                          <div className='truncate'>{product.product.nameProduct} </div>
                         </div>
                         <div className='col-span-1 flex items-start justify-end text-orange'>
                           <span className='mr-[2px] text-[10px] underline'>đ</span>
@@ -97,9 +95,9 @@ export default function Header() {
                   </div>
 
                   <div className='flex items-center justify-between p-2 '>
-                    {productInCartData.length > MAX_PRODUCTS_SHOW ? (
+                    {productInCartData?.length > MAX_PRODUCTS_SHOW ? (
                       <div className='text-xs capitalize'>
-                        <span>{productInCartData.length - MAX_PRODUCTS_SHOW} </span>
+                        <span>{productInCartData?.length - MAX_PRODUCTS_SHOW} </span>
                         Thêm hàng vào giỏ
                       </div>
                     ) : (
@@ -143,9 +141,9 @@ export default function Header() {
                 </svg>
               </Link>
 
-              {productInCartData && productInCartData.length && isAuthenticated ? (
+              {productInCartData && productInCartData?.length && isAuthenticated ? (
                 <span className='absolute -top-[10px] right-[18px] rounded-xl bg-white px-2 text-sm text-orange'>
-                  {productInCartData.length}
+                  {productInCartData?.length}
                 </span>
               ) : null}
             </div>
