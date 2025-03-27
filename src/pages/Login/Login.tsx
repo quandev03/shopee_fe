@@ -11,10 +11,11 @@ import { useContext } from 'react';
 import { AppContext } from 'src/contexts/app.context';
 import Button from 'src/components/Button';
 import { Helmet } from 'react-helmet-async';
+import {User} from "../../@types/user.type.ts";
 
-type FormData = Pick<Schema, 'email' | 'password'>;
-
-const loginSchema = schema.pick(['email', 'password']);
+type FormData = Pick<Schema, 'username' | 'password'>;
+type Role = 'Admin' | 'User';
+const loginSchema = schema.pick(['username', 'password']);
 
 export default function Login() {
   const {
@@ -25,6 +26,20 @@ export default function Login() {
   } = useForm<FormData>({
     resolver: yupResolver(loginSchema)
   });
+
+  const mapBackendRoleToFrontend = (backendRoles: string | string[]): Role[] => {
+    // Kiểm tra nếu backend trả về một chuỗi đơn
+    if (typeof backendRoles === 'string') {
+      return backendRoles === 'ROLE_ADMIN' ? ['Admin'] : ['User'];
+    }
+
+    // Kiểm tra nếu backend trả về mảng chuỗi
+    return backendRoles.map((role) => {
+      if (role === 'ROLE_ADMIN') return 'Admin';
+      if (role === 'ROLE_USER') return 'User';
+      return role as Role; // Đảm bảo trả về kiểu Role
+    });
+  };
 
   const loginAccountMutation = useMutation({
     mutationFn: (body: FormData) => {
@@ -39,7 +54,20 @@ export default function Login() {
       onSuccess: (result) => {
         //set token and refresh token into LS
 
-        const { access_token, user } = result.data.data;
+        // const { access_token } = result.data.data;
+        console.log(result)
+        let dataResponse:any = result.data
+        let access_token = dataResponse.accessToken
+        let user :User = {
+          roles:  mapBackendRoleToFrontend(dataResponse.roles),
+          _id: dataResponse.id,
+          username: dataResponse.username,
+          name: dataResponse.username,
+          avatar: dataResponse.avatar,
+          createdAt: "",
+          updatedAt: ""
+        }
+
 
         setIsAuthenticated(Boolean(access_token));
         setProfile(user);
@@ -78,9 +106,9 @@ export default function Login() {
             <div className='form__title text-xl lg:text-2xl'>Đăng nhập</div>
             <div className='mt-3'>
               <Input
-                name='email'
-                placeholder='Email'
-                errorMessage={errors.email?.message}
+                name='username'
+                placeholder='Username'
+                errorMessage={errors.username?.message}
                 register={register}
                 type='email'
               />

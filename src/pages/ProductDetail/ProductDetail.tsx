@@ -9,13 +9,32 @@ import ProductRating from 'src/components/ProductRating';
 import QuantityController from 'src/components/QuantityController';
 import { path } from 'src/constants/path';
 import { purchasesStatus } from 'src/constants/purchases';
-import { ProductListConfig, Product as ProductType } from 'src/@types/product.type';
+import { ProductListConfig, ProductType as ProductType } from 'src/@types/product.type';
 import { ProductCart } from 'src/@types/purchases.type';
 import { formatCurrency, formatNumberToSocialStyle, getIdFromNameId, saleRate } from 'src/utils/utils';
 import Product from '../ProductList/components/Product';
 import { useTranslation } from 'react-i18next';
 import { Helmet } from 'react-helmet-async';
 import { convert } from 'html-to-text';
+import {ProductResponseAPI} from "../../@types/product-res.type.ts";
+interface ProductResponse {
+  id: string;
+  nameProduct: string;
+  description: string;
+  price: number;
+  quantity: number;
+  soldQuantity: number;
+  viewedQuantity: number;
+  images: string[]; // Array of image URLs
+  image: string; // Single image URL
+  category: {
+    name: string;
+    id: string;
+  };
+  createDate: string; // Assuming createDate can be null
+  rating: number;
+}
+
 
 export default function ProductDetail() {
   const { t } = useTranslation('product');
@@ -25,10 +44,33 @@ export default function ProductDetail() {
   const queryClient = useQueryClient();
   const { data: productDetailData } = useQuery({
     queryKey: ['product', id],
-    queryFn: () => {
+    queryFn: ():Promise<any> => {
       return productApi.getProduct(id as string);
     }
   });
+  let responseData :ProductResponse =  productDetailData?.data;
+  console.log(responseData)
+
+  let productDetail: ProductType = {
+    _id: responseData?.id ,
+    images:responseData?.images,
+    price: responseData?.price,
+    rating: responseData?.rating,
+    price_before_discount: responseData?.price,
+    quantity: responseData?.quantity,
+    sold: responseData?.soldQuantity,
+    view: responseData?.viewedQuantity,
+    description: responseData?.description,
+    name: responseData?.nameProduct,
+    category: {
+      _id: responseData?.category.id,
+      name: responseData?.category.name
+    },
+    image: responseData?.image,
+    createdAt: responseData?.createDate ? responseData?.createDate : "",
+    updatedAt: ""
+  }
+  console.log(responseData)
 
   const [role, setRole] = useState<number>(0);
   let cfm, btn = "";
@@ -37,7 +79,7 @@ export default function ProductDetail() {
 
   const [buyCount, setBuyCount] = useState(1);
 
-  const product = productDetailData?.data.data;
+  const product = productDetail;
 
   const queryConfig: ProductListConfig = { page: '1', limit: '20', category: product?.category._id };
 
@@ -49,15 +91,39 @@ export default function ProductDetail() {
     enabled: Boolean(product)
   });
 
+  let responseDataList: ProductResponseAPI | any = productList?.data;
+  let test_data =  responseDataList?.content.map((productsData:any) => {
+    return {
+      _id: productsData.id,
+      name: productsData.nameProduct,
+      description: productsData.description,
+      price: productsData.price,
+      quantity: productsData.quantity,
+      sold: productsData.soldQuantity,
+      view: productsData.viewedQuantity,
+      image: productsData.image ?? '',  // Handle null values
+      category: {
+        _id: productsData.category?.id, // Handle optional category
+        name: productsData.category?.name
+      },
+      rating: 0,
+      price_before_discount : productsData.price,
+      images: [], // Default to an empty array if images are missing
+      createdAt: "",
+      updatedAt: ""
+    };
+  });
+
+
+
+  console.log(test_data)
   const imageRef = useRef<HTMLImageElement>(null);
 
   const [currentImagesIndex, setCurrentImageIndex] = useState([0, 5]);
 
   const [imageActived, setImageActived] = useState('');
 
-  const currentImagesList = useMemo(() => {
-    return (product as ProductType)?.images.slice(...currentImagesIndex);
-  }, [product, currentImagesIndex]);
+  const currentImagesList = productDetail?.images
 
   if (role == 0){
     cfm = "mua ngay";
@@ -75,7 +141,7 @@ export default function ProductDetail() {
   });
 
   useEffect(() => {
-    if (product && product.images.length) {
+    if (product && product?.images?.length) {
       setImageActived(product.images[0]);
     }
   }, [product]);
@@ -202,7 +268,7 @@ export default function ProductDetail() {
                 </svg>
               </button>
 
-              {currentImagesList.map((image) => {
+              {currentImagesList?.map((image) => {
                 const isActive = image === imageActived;
 
                 return (
@@ -367,11 +433,11 @@ export default function ProductDetail() {
         </div>
       </div>
       <div className='container mt-4'>
-        {productList && (
+        {test_data && (
           <div>
             <div className='uppercase text-gray-500'>{t('you may also like')}</div>
             <div className='mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6'>
-              {productList.data.data.products.map((product) => (
+              {test_data?.map((product:ProductType) => (
                 <Product key={product._id} product={product} />
               ))}
             </div>

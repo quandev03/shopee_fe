@@ -40,16 +40,18 @@ const tabArrayData = [
 export default function PurchaseHistory() {
   const params: { status?: string } = useQueryParams();
 
-  const status = Number(params.status) || purchasesStatus.all;
-
+  const status: number = Number(params.status) || purchasesStatus.all;
+  console.log(status)
   const { data, isLoading } = useQuery({
     queryKey: ['purchases', status],
-    queryFn: () => purchasesApi.getPurchases({ status: status as PurchaseListStatus }),
+    queryFn: () => purchasesApi.getPurchasesStatus(status),
     retry: 0
   });
 
-  const dataPurchases = data?.data.data;
+  const dataPurchases = data?.data;
+  console.log(dataPurchases)
 
+  console.log(dataPurchases)
   return (
     <div className='relative'>
       <Helmet>
@@ -81,30 +83,30 @@ export default function PurchaseHistory() {
 
           {!isLoading &&
             (dataPurchases && dataPurchases.length ? (
-              dataPurchases.map((purchase) => (
-                <div key={purchase._id} className='mt-3 bg-white px-6 py-4 shadow-sm'>
+              dataPurchases?.map((purchase) => (
+                <div key={purchase?.orderId} className='mt-3 bg-white px-6 py-4 shadow-sm'>
                   <Link
-                    to={`${path.home}${generateNameId({ name: purchase.product.name, id: purchase.product._id })}`}
+                    to={`${path.home}${generateNameId({ name: purchase?.productDTO?.nameProduct, id: purchase?.productDTO?.id })}`}
                     className='flex'
                   >
                     <div className='h-24 w-24 flex-shrink-0'>
-                      <img src={purchase.product.image} alt={purchase.product.name} className='h-full w-full' />
+                      <img src={purchase?.productDTO?.image} alt={purchase?.productDTO?.nameProduct} className='h-full w-full' />
                     </div>
                     <div className='ml-4 mr-4 max-w-[1000px] text-gray-700'>
-                      <p>{purchase.product.name}</p>
-                      <p className='my-1 text-sm text-gray-400'>Phân loại hàng: {purchase.product.category.name}</p>
-                      <span className='text-sm'>x{purchase.buy_count}</span>
+                      <p>{purchase?.productDTO?.nameProduct}</p>
+                      <p className='my-1 text-sm text-gray-400'>Phân loại hàng: {purchase?.productDTO?.category?.name}</p>
+                      <span className='text-sm'>x{purchase?.quantity}</span>
                     </div>
                     <div className='ml-auto'>
                       <div className='flex h-full items-center justify-end gap-2'>
                         <div className='max-w-[50%] truncate text-gray-500 line-through'>
                           <span>₫</span>
-                          <span className='text-sm'>{formatCurrency(purchase.product.price_before_discount)}</span>
+                          <span className='text-sm'>{formatCurrency(purchase?.productDTO?.price)}</span>
                         </div>
 
                         <div className='text-orange'>
                           <span>₫</span>
-                          <span className='text-sm'>{formatCurrency(purchase.product.price)}</span>
+                          <span className='text-sm'>{formatCurrency(purchase?.productDTO?.price)}</span>
                         </div>
                       </div>
                     </div>
@@ -133,7 +135,7 @@ export default function PurchaseHistory() {
 
                     <div className='ml-2 text-xl text-orange'>
                       <span>₫</span>
-                      {formatCurrency(purchase.buy_count * purchase.product.price)}
+                      {formatCurrency(purchase?.quantity * purchase?.productDTO?.price)}
                     </div>
                   </div>
                 </div>

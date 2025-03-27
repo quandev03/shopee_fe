@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import ProductRating from 'src/components/ProductRating';
 import { path } from 'src/constants/path';
-import { Product as ProductType } from 'src/@types/product.type';
+import { ProductType } from 'src/@types/product.type';
 import { formatCurrency, formatNumberToSocialStyle, generateNameId } from 'src/utils/utils';
 import { useTranslation } from 'react-i18next';
 
@@ -11,6 +11,8 @@ interface Props {
 
 export default function Product({ product }: Props) {
   const { t } = useTranslation('product');
+
+  console.log(product)
   return (
     <Link to={`${path.home}${generateNameId({ name: product.name, id: product._id })}`}>
       <div className='overflow-hidden rounded-sm bg-white text-xs shadow transition-transform duration-100 hover:translate-y-[-0.1rem] hover:shadow-sm'>

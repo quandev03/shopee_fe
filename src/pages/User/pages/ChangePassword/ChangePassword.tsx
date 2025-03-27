@@ -11,6 +11,7 @@ import { ResponseErrorType } from 'src/@types/utils.type';
 import { UserSchema, userSchema } from 'src/utils/rules';
 import { isAxiosErrorUnprocessableEntity } from 'src/utils/utils';
 import { Helmet } from 'react-helmet-async';
+import {authApi} from "../../../../api/auth.api.ts";
 
 const passwordSchema = userSchema.pick(['password', 'new_password', 'confirm_password']);
 type PassWordData = Pick<UserSchema, 'password' | 'confirm_password' | 'new_password'>;
@@ -34,14 +35,27 @@ export default function ChangePassword() {
   const [disableSubmit, setDisableSubmit] = useState(false);
 
   const updatePassWordMutation = useMutation({
-    mutationFn: (body: BodyDataProfile) => userApi.updateProfile(body)
+    mutationFn: (body: {oldPassword: string, newPassword: string}) => authApi.resetPassword(body),
+    onSuccess: ()=>{toast.success("Reset pass success")},
+    onError:(error)=> {
+      console.log(error?.response?.data)
+      error?.response?.data?.forEach((e: string)=>{
+        toast.error(e)
+      })
+    }
   });
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       setDisableSubmit(true);
 
-      const res = await updatePassWordMutation.mutateAsync(omit(data, ['confirm_password']) as BodyDataProfile);
+      console.log(omit(data, ['confirm_password']) as BodyDataProfile)
+      let bodyData = omit(data, ['confirm_password']) as BodyDataProfile
+      let body :{oldPassword: string, newPassword: string} = {
+        oldPassword: bodyData.password,
+        newPassword: bodyData.new_password
+      }
+      const res = await updatePassWordMutation.mutateAsync(body);
 
       toast.success(res.data.message, { autoClose: 500 });
       setDisableSubmit(false);

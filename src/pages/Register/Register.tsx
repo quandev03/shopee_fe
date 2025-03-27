@@ -12,10 +12,16 @@ import { useContext } from 'react';
 import { AppContext } from 'src/contexts/app.context';
 import Button from 'src/components/Button';
 import { Helmet } from 'react-helmet-async';
+import {ObjectSchema} from "yup";
+import { message } from 'antd';
 
-type FormData = Pick<Schema, 'email' | 'password' | 'confirm_password'>;
+type FormData = {
+  username:string,
+  password: string,
+  phoneNumber: string
+};
 
-const registerSchema = schema.pick(['confirm_password', 'email', 'password']);
+const registerSchema:ObjectSchema<{phoneNumber: string, username: string}> = schema.pick(['phoneNumber', 'username', 'password']);
 
 export default function Register() {
   const {
@@ -29,21 +35,23 @@ export default function Register() {
     resolver: yupResolver(registerSchema)
   });
 
+  const [messageApi, contextHolder] = message.useMessage();
   const { setIsAuthenticated, setProfile } = useContext(AppContext);
   const registerAccountMutation = useMutation({
-    mutationFn: (body: Omit<FormData, 'confirm_password'>) => {
+    mutationFn: (body: FormData) => {
       return authApi.registerAccount(body);
     }
   });
 
-  const onSubmit = handleSubmit((data) => {
-    const body = omit(data, ['confirm_password']);
+  const onSubmit = handleSubmit((data:FormData) => {
+    const body:FormData = omit(data);
     registerAccountMutation.mutate(body, {
       onSuccess: (result) => {
         const { access_token, user } = result.data.data;
 
         setIsAuthenticated(Boolean(access_token));
         setProfile(user);
+        messageApi.info('Hello, Ant Design!');
       },
       onError: (error) => {
         if (isAxiosErrorUnprocessableEntity<ResponseErrorType<Omit<FormData, 'confirm_password'>>>(error)) {
@@ -52,9 +60,9 @@ export default function Register() {
           if (formError) {
             Object.keys(formError).forEach((key) => {
               setError(
-                key as keyof Omit<FormData, 'confirm_password'>,
+                key as keyof Omit<FormData, 'phoneNumber'>,
                 {
-                  message: formError[key as keyof Omit<FormData, 'confirm_password'>],
+                  message: formError[key as keyof Omit<FormData, 'phoneNumber'>],
                   type: 'Server'
                 },
                 {
@@ -81,9 +89,9 @@ export default function Register() {
               <div className='form__title text-xl lg:text-2xl'>Đăng ký</div>
               <div className='mt-3'>
                 <Input
-                  name='email'
-                  placeholder='Email'
-                  errorMessage={errors.email?.message}
+                  name='username'
+                  placeholder='username'
+                  errorMessage={errors.username?.message}
                   register={register}
                   type='email'
                 />
@@ -103,11 +111,11 @@ export default function Register() {
 
               <div className='mt-2'>
                 <Input
-                  name='confirm_password'
+                  name='phoneNumber'
                   register={register}
-                  placeholder='Confirm password'
-                  type='password'
-                  errorMessage={errors.confirm_password?.message}
+                  placeholder='phoneNumber'
+                  type='text'
+                  errorMessage={errors.phoneNumber?.message}
                   autoComplete='on'
                   classNameOpenEye='absolute right-[6px] top-[12px] h-5 w-5 cursor-pointer'
                 />
