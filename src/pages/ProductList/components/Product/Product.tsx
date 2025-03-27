@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import ProductRating from 'src/components/ProductRating';
 import { path } from 'src/constants/path';
-import { ProductType} from 'src/@types/product.type';
+import { ProductType } from 'src/@types/product.type';
 import { formatCurrency, formatNumberToSocialStyle, generateNameId } from 'src/utils/utils';
 import { useTranslation } from 'react-i18next';
 
@@ -11,12 +11,14 @@ interface Props {
 
 export default function Product({ product }: Props) {
   const { t } = useTranslation('product');
+
+  console.log(product)
   return (
-    <Link to={`${path.home}${generateNameId({ name: product.name, id: product.id })}`}>
+    <Link to={`${path.home}${generateNameId({ name: product.name, id: product._id })}`}>
       <div className='overflow-hidden rounded-sm bg-white text-xs shadow transition-transform duration-100 hover:translate-y-[-0.1rem] hover:shadow-sm'>
         <div className='relative w-full pt-[100%]'>
           <img
-            src={product.image || undefined}
+            src={product.image}
             alt={product.name}
             className='absolute left-0 top-0 h-full w-full bg-white object-cover'
           />
@@ -29,7 +31,7 @@ export default function Product({ product }: Props) {
             <div className='flex items-center gap-2'>
               <div className='max-w-[50%] truncate text-gray-500 line-through'>
                 <span>₫</span>
-                <span className='text-sm'>{formatCurrency(product.price)}</span>
+                <span className='text-sm'>{formatCurrency(product.price_before_discount)}</span>
               </div>
 
               <div className='text-orange'>
@@ -44,7 +46,7 @@ export default function Product({ product }: Props) {
               <ProductRating rating={product.rating} />
 
               <div>
-                {t('sold')} <span>{formatNumberToSocialStyle(product.soldQuantity)}</span>
+                {t('sold')} <span>{formatNumberToSocialStyle(product.sold)}</span>
               </div>
             </div>
           </div>

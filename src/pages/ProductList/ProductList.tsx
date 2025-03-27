@@ -1,101 +1,117 @@
 import { useQuery } from '@tanstack/react-query';
-import { productApi } from 'src/api/product.api';
 import { categoryApi } from 'src/api/category.api';
-import { ProductListConfig, ProductType } from 'src/@types/product.type';
+import { productApi } from 'src/api/product.api';
 import Pagination from 'src/components/Pagination';
-import SortProduct from './components/SortProduct';
+import useQueryConfig from 'src/hooks/useQueryConfig';
+import {Category, ProductListConfig, ProductResponse, ProductType} from 'src/@types/product.type';
 import AsideFilter from './components/AsideFilter';
-import { useEffect } from 'react';
-import { Helmet } from 'react-helmet-async';
 import Product from './components/Product';
-import useQueryConfig from '../../hooks/useQueryConfig';
-import { log } from 'console';
+import SortProduct from './components/SortProduct';
+import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
+import {ProductResponseAPI} from "../../@types/product-res.type.ts";
+import {CategoryType} from "../../@types/category.type.ts";
 
+type Pagination = {
+  page: number,
+  limit: number,
+  page_size: number
+}
 export default function ProductList() {
   const queryConfig = useQueryConfig();
 
-  // Query API lấy danh sách sản phẩm
-  const { data: productsData, isLoading: productsLoading } = useQuery({
-    queryKey: ['productList', queryConfig],
-    queryFn: () => productApi.getProductList(queryConfig as ProductListConfig),
-    keepPreviousData: true
-  });
-  
+  const { data: productsData, isLoading, isError } = useQuery(
+      ['productList', queryConfig],  // queryKey bao gồm cả 'productList' và queryConfig
+      async (): Promise<any> => {
+        return productApi.getProductList(queryConfig as ProductListConfig);  // Gọi API với queryConfig đã được xác định
+      },
+      {
+        keepPreviousData: true,  // Giữ dữ liệu cũ khi thay đổi queryConfig
+        refetchOnWindowFocus: false,  // Nếu cần, có thể tắt refetch khi focus lại cửa sổ
+        staleTime: 1000 * 60 * 5,  // Tùy chọn: Đặt thời gian stale (ví dụ 5 phút)
+        retry: 1  // Tùy chọn: Thử lại 1 lần nếu có lỗi
+      }
+  );
 
-  // Query API lấy danh sách danh mục
-  const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
-    queryKey: ['categories'],
-    queryFn: () => categoryApi.getAll()
-  });
+  console.log(productsData)
+  let responseData: ProductResponseAPI | undefined = productsData?.data;
+  console.log(responseData)
 
-  useEffect(() => {
-    if (productsData) {
-      window.scrollTo(0, 0); // Cuộn lên đầu trang khi productsData thay đổi
-    }
-  }, [productsData]);
+  let dataProduct = productsData?.data?.content;
 
-  if (productsLoading || categoriesLoading) {
-    return <div>Loading...</div>;
+  let pagination:Pagination = {
+    page: productsData?.data?.pageable?.pageNumber,
+    limit: productsData?.data?.pageable?.pageSize,
+    page_size : Math.ceil(productsData?.data?.pageable?.pageSize / productsData?.data?.pageable?.pageNumber+1)
   }
+  let test_data =  responseData?.content.map((productsData) => {
+    return {
+      _id: productsData.id,
+      name: productsData.nameProduct,
+      description: productsData.description,
+      price: productsData.price,
+      quantity: productsData.quantity,
+      sold: productsData.soldQuantity,
+      view: productsData.viewedQuantity,
+      image: productsData.image ?? '',  // Handle null values
+      category: {
+        _id: productsData.category?.id, // Handle optional category
+        name: productsData.category?.name
+      },
+      rating: 0,
+      price_before_discount : productsData.price,
+      images: [], // Default to an empty array if images are missing
+      createdAt: "",
+      updatedAt: ""
+    };
+  });
+  console.log(test_data)
 
-  console.log(productsData?.data.content)
 
-  // Truy cập vào response.data để lấy các thuộc tính như pagination
-  const products = productsData?.data.content.map((product) => ({
-    id: product.id,
-    name: product.nameProduct || "No name",
-    description: product.description,
-    price: product.price,
-    quantity: product.quantity,
-    soldQuantity: product.soldQuantity,
-    viewedQuantity: product.viewedQuantity,
-    images: product.images != null ? product.images : [],
-    image: product.image? product.image : '',
-    category: product.category ? {
-      _id: product.category._id,
-      name: product.category.name
-    } : undefined
-  }));
-  console.log(products);
+  const { data: categoriesData } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => {
+      return categoryApi.getAll();
+    }
+  });
+  console.log(categoriesData)
+  let dataCategory: CategoryType[] | [] = categoriesData?.data?.map((category:any) => {
+    return {
+      _id: category?.id,
+      name: category?.name
+    }
+  })
+  console.log(dataCategory);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [productsData])
 
   return (
-      <div className="bg-gray-100 py-3">
-        <Helmet>
-          <title>Shopee Clone | Ho Hoang Sang</title>
-          <meta name="description" content="Đây là dự án cá nhân và thực hiện không vì mục đích thương mại" />
-        </Helmet>
+    <div className='bg-gray-100 py-3'>
+      <Helmet>
+        <title>Shopee Clone | Ho Hoang Sang</title>
+        <meta name='descroption' content='Đây là dự án cá nhân và thực hiện không vì mục đích thương mại' />
+      </Helmet>
 
-        <div className="container">
-          {productsData && (
-              <div className="grid grid-cols-12 gap-6">
-                <div className="col-span-2">
-                  <AsideFilter queryConfig={queryConfig} categories={categoriesData?.data.data || []} />
-                </div>
+      <div className='container'>
+        {productsData && (
+          <div className='grid grid-cols-12 gap-6'>
+            <div className='col-span-2'>
+              <AsideFilter queryConfig={queryConfig} categories={dataCategory || []} />
+            </div>
 
-                <div className="col-span-10">
-                  {queryConfig && (
-                    <>
-                      {/* <SortProduct pageSize={productsData?.data?.pagination?.page_size} queryConfig={queryConfig} /> */}
-                      <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                        {products?.map((product) => (
-                            <Product 
-                              key={product.id} 
-                              product={{
-                                ...product,
-                                priceBeforeDiscount: product.price,
-                                soldQuantity: product.soldQuantity,
-                                rating: 5
-                              }}
-                            />
-                        ))}
-                      </div>
-                      {/* <Pagination queryConfig={queryConfig} pageSize={productsData?.data?.pagination?.page_size} /> */}
-                    </>
-                  )}
-                </div>
+            <div className='col-span-10'>
+              {/*<SortProduct pageSize={pagination.page_size} queryConfig={queryConfig} />*/}
+              <div className='mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'>
+                {test_data && test_data.map((product) => (
+                  <Product key={product._id} product={product} />
+                ))}
               </div>
-          )}
-        </div>
+              <Pagination queryConfig={queryConfig} page={pagination.page} limit={pagination.limit} />
+            </div>
+          </div>
+        )}
       </div>
+    </div>
   );
 }

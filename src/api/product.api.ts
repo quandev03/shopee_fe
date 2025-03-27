@@ -6,7 +6,7 @@ export const URL = '/product';
 
 export const productApi = {
   getProductList: (params: ProductListConfig) => {
-    return api.get<ResponseSuccessType<ProductList>>(URL+"/get-list", {params});
+    return api.get<ResponseSuccessType<ProductList>>(URL+"/get-list", {});
   },
 
   getProduct: (id: string) => {

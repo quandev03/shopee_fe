@@ -25,6 +25,19 @@ type UserFormErrorData = Omit<UserFormSchema, 'date_of_birth'> & {
   date_of_birth: string;
 };
 
+const dataToString = (date: Date): string => {
+  // Lấy tháng (cộng thêm 1 vì getMonth trả về từ 0 đến 11)
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+
+  // Lấy ngày và đảm bảo có 2 chữ số
+  const day = String(date.getDate()).padStart(2, '0');
+
+  // Lấy năm
+  const year = date.getFullYear();
+
+  // Trả về chuỗi theo định dạng MM/dd/yyyy
+  return `${month}/${day}/${year}`;
+};
 
 
 function Info() {
@@ -33,6 +46,8 @@ function Info() {
     formState: { errors },
     register
   } = useFormContext<UserFormSchema>();
+
+  console.log(errors)
 
   return (
     <Fragment>
@@ -47,6 +62,7 @@ function Info() {
             classNameInput='w-full rounded-sm border border-gray-300 py-2 px-3 shadow-sm outline-none focus:border-gray-500'
             name='name'
             placeholder='Tên'
+            disabled={true}
             errorMessage={errors.name?.message}
             register={register}
           />
@@ -72,19 +88,6 @@ function Info() {
           />
         </div>
       </div>
-      <div className='flex flex-col flex-wrap sm:mt-2 sm:flex-row'>
-        <div className='truncate capitalize text-gray-500 sm:mt-3 sm:w-[20%] sm:text-right'>Địa chỉ
-        </div>
-        <div className='sm:w-[80%] sm:pl-5'>
-          {/* them drop box */}
-          <select className='h-[40px] w-[32%] rounded-sm border px-3 outline-none hover:border-orange'>
-            <option value="1">Địa chỉ 1</option>
-            <option value="2">Địa chỉ 2</option>
-            <option value="3">Địa chỉ 3</option>
-            <option value="4">Địa chỉ 4</option>
-        </select>
-        </div>
-      </div>
     </Fragment>
   );
 }
@@ -97,9 +100,13 @@ export default function Profile() {
     queryKey: ['profile'],
     queryFn: userApi.getProfile
   });
+  console.log(profileData)
 
   const updateProfileMutation = useMutation({
-    mutationFn: (body: BodyDataProfile) => userApi.updateProfile(body)
+    mutationFn: (body: {phone: string, birthday: string}) => userApi.updateProfile(body),
+    onSuccess: ()=>{
+      toast.success("Success")
+    }
   });
 
   const uploadImageMutation = useMutation({
@@ -109,12 +116,10 @@ export default function Profile() {
   const [file, setFile] = useState<File>();
   const [disableSubmit, setDisableSubmit] = useState(false);
 
-  const previewImage = useMemo(() => {
-    return file ? URL.createObjectURL(file) : '';
-  }, [file]);
 
-  const profile = profileData?.data.data;
 
+  const profile = profileData?.data;
+  const previewImage = profile?.avatar
   const methods = useForm<UserFormSchema>({
     defaultValues: {
       address: '',
@@ -134,41 +139,57 @@ export default function Profile() {
     setError
   } = methods;
 
+  console.log(profile?.birthday)
+
   useEffect(() => {
     if (profile) {
-      setValue('name', profile.name);
-      setValue('phone', profile.phone);
-      setValue('address', profile.address);
-      setValue('date_of_birth', profile.date_of_birth ? new Date(profile.date_of_birth) : new Date(1990, 0, 1));
-      setValue('avatar', profile.avatar);
+      setValue('name', profile?.username);
+      setValue('phone', profile?.phone);
+      // setValue('address', profile.address);
+      setValue('date_of_birth', profile?.birthday ? new Date(profile?.birthday) : new Date(1990, 0, 1));
+      setValue('avatar', profile?.avatar);
     }
   }, [profile, setValue]);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       let uploadAvatar = '';
+      console.log(data.date_of_birth)
+      console.log(dataToString(data.date_of_birth))
 
       setDisableSubmit(true);
 
       if (file) {
         const fileUpload = new FormData();
+        console.log(file)
 
         fileUpload.append('image', file);
 
         const res = await uploadImageMutation.mutateAsync(fileUpload);
-        uploadAvatar = res.data.data;
+        console.log("Image upload success");
       }
 
-      const res = await updateProfileMutation.mutateAsync({
-        ...data,
-        date_of_birth: data.date_of_birth?.toISOString(),
-        avatar: uploadAvatar || profile?.avatar
+      let body: { phone: string, birthday: string } = {
+        phone: data.phone,
+        birthday: dataToString(data.date_of_birth)
+      }
+
+      // Gọi mutation để cập nhật thông tin người dùng
+      updateProfileMutation.mutate(body, {
+        onSuccess: () => {
+          // Sau khi thành công, gọi refetch để lấy lại dữ liệu mới từ server
+          refetch();  // Hàm này sẽ lấy lại dữ liệu mới từ API và cập nhật UI
+          toast.success("Profile updated successfully", { autoClose: 500 });
+
+          // Bạn có thể cập nhật state nếu muốn:
+          // setProfile(updatedData); // nếu `updatedData` là dữ liệu mới trả về từ API
+        },
+        onError: (error) => {
+          console.error("Error updating profile", error);
+          toast.error("Failed to update profile");
+        }
       });
 
-      refetch();
-      toast.success(res.data.message, { autoClose: 500 });
-      setProfile(res.data.data);
-      setProfileToLS(res.data.data);
       setDisableSubmit(false);
     } catch (error) {
       if (isAxiosErrorUnprocessableEntity<ResponseErrorType<UserFormErrorData>>(error)) {
@@ -212,9 +233,27 @@ export default function Profile() {
             <div className='col-span-12 md:col-span-8'>
               <div className='flex flex-col flex-wrap sm:flex-row'>
                 <div className='text-gray-500 sm:w-[20%] sm:text-right '>Username</div>
-                <div className='sm:w-[80%] sm:pl-5'>{profile?.email}</div>
+                {/*<div className='sm:w-[80%] sm:pl-5'>{profile?.email}</div>*/}
               </div>
               <Info />
+
+              <div className='flex flex-col flex-wrap sm:mt-2 sm:flex-row'>
+                <div className='truncate capitalize text-gray-500 sm:mt-3 sm:w-[20%] sm:text-right'>Địa chỉ
+                </div>
+                <div className='sm:w-[80%] sm:pl-5'>
+                  {/* them drop box */}
+                  <select className="h-[40px] w-[32%] rounded-sm border px-3 outline-none hover:border-orange">
+                    {profile?.addressList?.map((address) => (
+                        <option key={address.id} value={address.id}>
+                          Tên: {address.name} <br />
+                          Địa chỉ: {address.detail || 'Chưa có thông tin'}, {address.commune}, {address.district}, {address.province}
+                          <br />
+                          Số điện thoại: {address.phone}
+                        </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               <div className='flex flex-col flex-wrap sm:mt-2 sm:flex-row'>
                 <div className='truncate capitalize text-gray-500 sm:mt-3 sm:w-[20%] sm:text-right'>Ngày sinh</div>
                 <Controller
@@ -249,7 +288,7 @@ export default function Profile() {
             <div className='m-auto flex w-[180px] flex-col justify-center border-b border-b-gray-200 pb-4 lg:w-72 lg:border-b-0 lg:border-l lg:border-l-gray-200'>
               <div className='m-auto my-3 h-[100px] w-[100px] md:mb-6 md:mt-8'>
                 <img
-                  src={previewImage || generateImageUrl(profile?.avatar) || userSideNavDefault}
+                  src={previewImage }
                   alt='avatar'
                   className='h-full w-full rounded-full object-cover'
                 />
