@@ -599,6 +599,7 @@ useEffect(()=>{
     })
   };
 
+  // @ts-ignore
   return (
       <div className="bg-neutral-100">
         <Helmet>

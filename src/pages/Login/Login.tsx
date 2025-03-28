@@ -18,6 +18,7 @@ type Role = 'Admin' | 'User';
 const loginSchema = schema.pick(['username', 'password']);
 
 export default function Login() {
+  const navigate = useNavigate();
   const {
     formState: { errors },
     register,
@@ -53,13 +54,13 @@ export default function Login() {
     loginAccountMutation.mutate(data, {
       onSuccess: (result) => {
         //set token and refresh token into LS
-
-        // const { access_token } = result.data.data;
         console.log(result)
         let dataResponse:any = result.data
         let access_token = dataResponse.accessToken
+        let mappedRoles = mapBackendRoleToFrontend(dataResponse.roles)
+        
         let user :User = {
-          roles:  mapBackendRoleToFrontend(dataResponse.roles),
+          roles: mappedRoles,
           _id: dataResponse.id,
           username: dataResponse.username,
           name: dataResponse.username,
@@ -68,9 +69,20 @@ export default function Login() {
           updatedAt: ""
         }
 
-
         setIsAuthenticated(Boolean(access_token));
         setProfile(user);
+        
+        // Lưu token vào localStorage
+        localStorage.setItem('access_token', access_token);
+        
+        // Điều hướng người dùng dựa vào role
+        if (mappedRoles.includes('Admin')) {
+          // Nếu user có quyền Admin, chuyển đến trang admin
+          navigate('/admin/dashboard');
+        } else {
+          // Người dùng thông thường được chuyển đến trang chủ
+          navigate('/');
+        }
       },
       onError: (error) => {
         if (isAxiosErrorUnprocessableEntity<ResponseErrorType<FormData>>(error)) {
