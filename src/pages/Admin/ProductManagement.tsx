@@ -20,6 +20,9 @@ const ProductManagement = () => {
   const [currentProduct, setCurrentProduct] = useState(null);
   const [form] = Form.useForm();
   const [imageUrl, setImageUrl] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -108,6 +111,47 @@ const ProductManagement = () => {
     }
   };
 
+  const handleAddCategory = () => {
+    setEditingId(null);
+    form.resetFields();
+    setIsModalVisible(true);
+  };
+
+  const handleModalOk = () => {
+    form.validateFields().then((values) => {
+      if (editingId === null) {
+        // Thêm mới danh mục
+        const newCategory = {
+          id: Date.now(),
+          name: values.name,
+          products: [], // Danh sách sản phẩm rỗng
+        };
+        setCategories([...categories, newCategory]);
+        message.success('Thêm danh mục thành công');
+      } else {
+        // Cập nhật danh mục
+        setCategories(categories.map(item =>
+          item.id === editingId ? { ...item, name: values.name } : item
+        ));
+        message.success('Cập nhật danh mục thành công');
+      }
+      setIsModalVisible(false);
+      form.resetFields();
+    });
+  };
+
+  const handleEditCategory = (category) => {
+    setEditingId(category.id);
+    form.setFieldsValue({ name: category.name });
+    setIsModalVisible(true);
+  };
+
+  const handleViewProducts = (category) => {
+    // Logic để hiển thị sản phẩm thuộc danh mục
+    console.log('Sản phẩm thuộc danh mục:', category);
+    // Bạn có thể mở một modal hoặc điều hướng đến trang sản phẩm
+  };
+
   const columns = [
     {
       title: 'ID',
@@ -166,6 +210,29 @@ const ProductManagement = () => {
           >
             <Button icon={<DeleteOutlined />} danger />
           </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  const columns2 = [
+    {
+      title: 'Tên danh mục',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'Số lượng sản phẩm',
+      dataIndex: 'products',
+      key: 'products',
+      render: (products) => products.length, // Hiển thị số lượng sản phẩm
+    },
+    {
+      title: 'Chi tiết',
+      key: 'action',
+      render: (text, record) => (
+        <Space>
+          <Button type="link" onClick={() => handleViewProducts(record)}>Chi tiết</Button>
         </Space>
       ),
     },
@@ -316,6 +383,37 @@ const ProductManagement = () => {
             <p><strong>Mô tả:</strong> {currentProduct.description || 'Không có mô tả'}</p>
           </div>
         )}
+      </Modal>
+
+      <Space style={{ marginBottom: 16, justifyContent: 'space-between', width: '100%' }}>
+        <Title level={2}>Quản lý danh mục sản phẩm</Title>
+        <Button type="primary" onClick={handleAddCategory}>Thêm danh mục sản phẩm</Button>
+      </Space>
+
+      <Table
+        columns={columns2}
+        dataSource={categories}
+        rowKey="id"
+      />
+
+      <Modal
+        title={editingId === null ? "Thêm danh mục sản phẩm" : "Sửa danh mục sản phẩm"}
+        visible={isModalVisible}
+        onOk={handleModalOk}
+        onCancel={() => setIsModalVisible(false)}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+        >
+          <Form.Item
+            name="name"
+            label="Tên danh mục"
+            rules={[{ required: true, message: 'Vui lòng nhập tên danh mục' }]}
+          >
+            <Input placeholder="Nhập tên danh mục" />
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );

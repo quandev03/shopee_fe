@@ -22,6 +22,7 @@ import AccountManagement from './pages/Admin/AccountManagement';
 import OrderManagement from './pages/Admin/OrderManagement';
 import SalesManagement from './pages/Admin/SalesManagement';
 import {localStorageEventTarget} from "./utils/auth.ts";
+import Vouchers from "./pages/Admin/Vouchers.tsx";
 
 function App() {
     const { clearData } = useContext(AppContext);
@@ -60,6 +61,7 @@ function App() {
                             <Route path="orders" element={<OrderManagement />} />
                             <Route path="sales" element={<SalesManagement />} />
                             <Route path="revenue" element={<SalesManagement />} />
+                            <Route path= "vouchers" element={<Vouchers/>} />
                             <Route path="*" element={<Navigate to="dashboard" replace />} />
                         </Route>
                     </Route>

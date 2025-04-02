@@ -6,7 +6,7 @@ import {
 import {
   DollarOutlined, UserOutlined, ShoppingOutlined, 
   AppstoreOutlined, ArrowUpOutlined, ArrowDownOutlined,
-  ClockCircleOutlined, WarningOutlined
+  ClockCircleOutlined, WarningOutlined, TagOutlined
 } from '@ant-design/icons';
 import { Line } from 'react-chartjs-2';
 import {
@@ -19,6 +19,7 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
+import { Link } from 'react-router-dom';
 
 ChartJS.register(
   LineElement,
@@ -244,6 +245,40 @@ const Dashboard = () => {
                 <WarningOutlined /> {dashboardData?.stats?.lowStockProducts} sản phẩm sắp hết hàng
               </Button>
             </div>
+          </Card>
+        </Col>
+      </Row>
+
+      <Row gutter={16} style={{ marginTop: 16 }}>
+        <Col span={24}>
+          <Card
+            title="Quản lý Voucher"
+            extra={
+              <Link to="/admin/vouchers">
+                <Button type="primary" icon={<TagOutlined />}>
+                  Quản lý Vouchers
+                </Button>
+              </Link>
+            }
+          >
+            <Row gutter={16}>
+              <Col span={12}>
+                <Statistic
+                  title="Tổng số voucher đang hoạt động"
+                  value={10}
+                  valueStyle={{ color: '#eb2f96' }}
+                  prefix={<TagOutlined />}
+                />
+              </Col>
+              <Col span={12}>
+                <Statistic
+                  title="Voucher đã sử dụng trong tháng"
+                  value={150}
+                  valueStyle={{ color: '#52c41a' }}
+                  prefix={<TagOutlined />}
+                />
+              </Col>
+            </Row>
           </Card>
         </Col>
       </Row>
