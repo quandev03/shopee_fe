@@ -19,7 +19,7 @@ type Pagination = {
 }
 export default function ProductList() {
   const queryConfig = useQueryConfig();
-
+  console.log("Trang chủ")
   const { data: productsData, isLoading, isError } = useQuery(
       ['productList', queryConfig],  // queryKey bao gồm cả 'productList' và queryConfig
       async (): Promise<any> => {

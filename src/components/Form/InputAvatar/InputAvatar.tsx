@@ -38,7 +38,6 @@ export default function InputAvatar({ onChange }: Props) {
         ref={uploadImageRef}
         onChange={changeImage}
         onClick={(event) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (event.target as any).value = null;
         }}
       />

@@ -105,11 +105,11 @@ const SalesManagement = () => {
   };
   
   const revenueChartData = {
-    labels: dashboardData.salesData.map(item => moment(item.date).format('DD/MM')),
+    labels: dashboardData?.salesData?.map(item => moment(item.date).format('DD/MM')),
     datasets: [
       {
         label: 'Doanh thu (VNĐ)',
-        data: dashboardData.salesData.map(item => item.revenue),
+        data: dashboardData?.salesData?.map(item => item.revenue),
         fill: false,
         borderColor: 'rgb(75, 192, 192)',
         tension: 0.1
@@ -118,22 +118,22 @@ const SalesManagement = () => {
   };
   
   const orderChartData = {
-    labels: dashboardData.salesData.map(item => moment(item.date).format('DD/MM')),
+    labels: dashboardData?.salesData?.map(item => moment(item.date).format('DD/MM')),
     datasets: [
       {
         label: 'Số đơn hàng',
-        data: dashboardData.salesData.map(item => item.orderCount),
+        data: dashboardData?.salesData?.map(item => item.orderCount),
         backgroundColor: 'rgba(54, 162, 235, 0.5)',
       }
     ]
   };
   
   const categoryChartData = {
-    labels: dashboardData.categoryData.map(item => item.category),
+    labels: dashboardData?.categoryData?.map(item => item.category),
     datasets: [
       {
         label: 'Doanh thu theo danh mục',
-        data: dashboardData.categoryData.map(item => item.revenue),
+        data: dashboardData?.categoryData?.map(item => item.revenue),
         backgroundColor: [
           'rgba(255, 99, 132, 0.6)',
           'rgba(54, 162, 235, 0.6)',
@@ -247,7 +247,7 @@ const SalesManagement = () => {
           <Card>
             <Statistic
               title="Tổng doanh thu"
-              value={dashboardData.stats.totalRevenue}
+              value={dashboardData?.stats?.totalRevenue}
               precision={0}
               valueStyle={{ color: '#3f8600' }}
               prefix={<DollarOutlined />}
@@ -260,7 +260,7 @@ const SalesManagement = () => {
           <Card>
             <Statistic
               title="Tổng đơn hàng"
-              value={dashboardData.stats.totalOrders}
+              value={dashboardData?.stats?.totalOrders}
               valueStyle={{ color: '#1677ff' }}
               prefix={<ShoppingOutlined />}
             />
@@ -270,7 +270,7 @@ const SalesManagement = () => {
           <Card>
             <Statistic
               title="Giá trị đơn hàng trung bình"
-              value={dashboardData.stats.totalOrders ? Math.round(dashboardData.stats.totalRevenue / dashboardData.stats.totalOrders) : 0}
+              value={dashboardData?.stats?.totalOrders ? Math.round(dashboardData?.stats?.totalRevenue / dashboardData?.stats.totalOrders) : 0}
               precision={0}
               valueStyle={{ color: '#cf1322' }}
               prefix={<LineChartOutlined />}
@@ -286,26 +286,38 @@ const SalesManagement = () => {
       <Row gutter={16}>
         <Col span={16}>
           <Card title="Doanh thu theo ngày" loading={loading}>
-            <Line data={revenueChartData} options={{ responsive: true, maintainAspectRatio: false, height: 300 }} />
+            <Line
+              key={JSON.stringify(revenueChartData)}
+              data={revenueChartData}
+              options={{ responsive: true, maintainAspectRatio: false, height: 300 }}
+            />
           </Card>
         </Col>
         <Col span={8}>
           <Card title="Phân bố danh mục" loading={loading}>
-            <Pie data={categoryChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+            <Pie
+              key={JSON.stringify(categoryChartData)}
+              data={categoryChartData}
+              options={{ responsive: true, maintainAspectRatio: false }}
+            />
           </Card>
         </Col>
       </Row>
-      
+
       <Row gutter={16} style={{ marginTop: 16 }}>
         <Col span={16}>
           <Card title="Số lượng đơn hàng theo ngày" loading={loading}>
-            <Bar data={orderChartData} options={{ responsive: true, maintainAspectRatio: false, height: 300 }} />
+            <Bar
+              key={JSON.stringify(orderChartData)}
+              data={orderChartData}
+              options={{ responsive: true, maintainAspectRatio: false, height: 300 }}
+            />
           </Card>
         </Col>
         <Col span={8}>
           <Card title="Doanh thu theo danh mục" loading={loading}>
             <Table 
-              dataSource={dashboardData.categoryData} 
+              dataSource={dashboardData?.categoryData}
               rowKey="category"
               pagination={false}
               columns={[
@@ -338,7 +350,7 @@ const SalesManagement = () => {
         <Col span={12}>
           <Card title="Top 5 sản phẩm bán chạy" loading={loading}>
             <Table
-              dataSource={dashboardData.topProducts}
+              dataSource={dashboardData?.topProducts}
               columns={productColumns}
               rowKey="id"
               pagination={false}
@@ -348,7 +360,7 @@ const SalesManagement = () => {
         <Col span={12}>
           <Card title="Top 5 khách hàng" loading={loading}>
             <Table
-              dataSource={dashboardData.topCustomers}
+              dataSource={dashboardData?.topCustomers}
               columns={customerColumns}
               rowKey="id"
               pagination={false}

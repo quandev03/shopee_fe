@@ -327,4 +327,4 @@ const AccountManagement = () => {
   );
 };
 
-export default AccountManagement; 
+export default AccountManagement;

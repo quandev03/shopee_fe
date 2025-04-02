@@ -9,6 +9,27 @@ import {
   ClockCircleOutlined, WarningOutlined
 } from '@ant-design/icons';
 import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  Legend,
+  Filler,
+} from 'chart.js';
+
+ChartJS.register(
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  Legend,
+  Filler
+);
+
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 
@@ -101,11 +122,11 @@ const Dashboard = () => {
   };
   
   const revenueChartData = dashboardData ? {
-    labels: dashboardData.salesData.map(item => moment(item.date).format('DD/MM')),
+    labels: dashboardData?.salesData?.map(item => moment(item.date).format('DD/MM')),
     datasets: [
       {
         label: 'Doanh thu (VNĐ)',
-        data: dashboardData.salesData.map(item => item.revenue),
+        data: dashboardData?.salesData ? dashboardData.salesData.map(item => item.revenue) : [],
         fill: true,
         backgroundColor: 'rgba(75, 192, 192, 0.2)',
         borderColor: 'rgb(75, 192, 192)',
@@ -113,7 +134,7 @@ const Dashboard = () => {
       }
     ]
   } : null;
-  
+
   const recentOrderColumns = [
     {
       title: 'Mã đơn hàng',
@@ -143,15 +164,15 @@ const Dashboard = () => {
       key: 'date',
     },
   ];
-  
+
   if (loading || !dashboardData) {
     return <div>Đang tải dữ liệu...</div>;
   }
-  
+
   return (
     <div>
       <Title level={2}>Dashboard</Title>
-      
+
       <Row gutter={16}>
         <Col span={6}>
           <Card>
@@ -180,8 +201,8 @@ const Dashboard = () => {
               prefix={<ShoppingOutlined />}
             />
             <div style={{ marginTop: 8 }}>
-              <Button 
-                type="link" 
+              <Button
+                type="link"
                 size="small"
                 onClick={() => navigate('/admin/orders')}
               >
@@ -214,43 +235,47 @@ const Dashboard = () => {
               prefix={<AppstoreOutlined />}
             />
             <div style={{ marginTop: 8 }}>
-              <Button 
-                type="link" 
-                size="small" 
+              <Button
+                type="link"
+                size="small"
                 danger
                 onClick={() => navigate('/admin/products')}
               >
-                <WarningOutlined /> {dashboardData.stats.lowStockProducts} sản phẩm sắp hết hàng
+                <WarningOutlined /> {dashboardData?.stats?.lowStockProducts} sản phẩm sắp hết hàng
               </Button>
             </div>
           </Card>
         </Col>
       </Row>
-      
+
       <Row gutter={16} style={{ marginTop: 16 }}>
         <Col span={16}>
           <Card title="Doanh thu 7 ngày gần nhất">
-            <Line data={revenueChartData} options={{ responsive: true, maintainAspectRatio: false, height: 300 }} />
+            {revenueChartData ? (
+              <Line data={revenueChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+            ) : (
+              <Text type="secondary">Không có dữ liệu doanh thu</Text>
+            )}
           </Card>
         </Col>
         <Col span={8}>
           <Card title="Sản phẩm sắp hết hàng" extra={<Button type="link" onClick={() => navigate('/admin/products')}>Xem tất cả</Button>}>
             <List
               itemLayout="horizontal"
-              dataSource={dashboardData.lowStockProducts}
+              dataSource={dashboardData?.lowStockProducts}
               renderItem={(item) => (
                 <List.Item>
                   <List.Item.Meta
-                    avatar={<img src={item.image} alt={item.name} style={{ width: 40, height: 40, objectFit: 'cover' }} />}
-                    title={item.name}
+                    avatar={<img src={item?.image} alt={item?.name} style={{ width: 40, height: 40, objectFit: 'cover' }} />}
+                    title={item?.name}
                     description={
                       <Space direction="vertical" style={{ width: '100%' }}>
-                        <Text type="danger">Còn {item.stock} sản phẩm</Text>
-                        <Progress 
-                          percent={Math.round((item.stock / item.minStock) * 100)} 
-                          status="exception" 
-                          showInfo={false} 
-                          size="small" 
+                        <Text type="danger">Còn {item?.stock} sản phẩm</Text>
+                        <Progress
+                          percent={Math.round((item?.stock / item?.minStock) * 100)}
+                          status="exception"
+                          showInfo={false}
+                          size="small"
                         />
                       </Space>
                     }
@@ -261,17 +286,17 @@ const Dashboard = () => {
           </Card>
         </Col>
       </Row>
-      
+
       <Card title="Đơn hàng gần đây" style={{ marginTop: 16 }} extra={<Button type="link" onClick={() => navigate('/admin/orders')}>Xem tất cả</Button>}>
-        <Table 
-          columns={recentOrderColumns} 
-          dataSource={dashboardData.recentOrders} 
-          rowKey="id" 
-          pagination={false} 
+        <Table
+          columns={recentOrderColumns}
+          dataSource={dashboardData?.recentOrders}
+          rowKey="id"
+          pagination={false}
         />
       </Card>
     </div>
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

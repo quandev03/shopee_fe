@@ -1,11 +1,11 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import AdminLayout from '../pages/admin/AdminLayout';
-import Dashboard from '../pages/admin/Dashboard';
-import ProductManagement from '../pages/admin/ProductManagement';
-import AccountManagement from '../pages/admin/AccountManagement';
-import OrderManagement from '../pages/admin/OrderManagement';
-import SalesManagement from '../pages/admin/SalesManagement';
+import AdminLayout from '../pages/Admin/AdminLayout.js';
+import Dashboard from '../pages/Admin/Dashboard.js';
+import ProductManagement from '../pages/Admin/ProductManagement.js';
+import AccountManagement from '../pages/Admin/AccountManagement.tsx';
+import OrderManagement from '../pages/Admin/OrderManagement.js';
+import SalesManagement from '../pages/Admin/SalesManagement.js';
 
 const AdminRoutes = () => {
   return (

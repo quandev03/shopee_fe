@@ -7,7 +7,7 @@ import {
   DashboardOutlined
 } from '@ant-design/icons';
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import AdminBreadcrumb from './AdminBreadcrumb';
+import AdminBreadcrumb from './AdminBreadcrumb.tsx';
 
 const { Header, Content, Sider } = Layout;
 
