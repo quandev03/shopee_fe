@@ -23,6 +23,7 @@ import OrderManagement from './pages/Admin/OrderManagement';
 import SalesManagement from './pages/Admin/SalesManagement';
 import {localStorageEventTarget} from "./utils/auth.ts";
 import Vouchers from "./pages/Admin/Vouchers.tsx";
+import ProductDetail from "./pages/ProductDetail";
 
 function App() {
     const { clearData } = useContext(AppContext);
@@ -45,6 +46,7 @@ function App() {
                     {/* Routes người dùng */}
                     <Route path="/" element={<MainLayout />}>
                         <Route index element={<HomePage />} />
+                        <Route path=':id' element={<ProductDetail/>} />
                     </Route>
 
                     {/* Auth */}
