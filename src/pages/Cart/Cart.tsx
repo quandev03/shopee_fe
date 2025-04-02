@@ -24,6 +24,17 @@ import DialogActions from '@mui/material/DialogActions';
 import Typography from '@mui/material/Typography';
 import {AddressApi} from "../../api/address.api.ts";
 import product from "../ProductList/components/Product";
+import {
+  Table,
+  Input,
+  Select,
+  Space,
+  message,
+} from 'antd';
+
+const { Title } = Typography;
+const { Option } = Select;
+
 const randomPage = randomInteger(1, 3).toString();
 const provinces = [
   'Hà Nội',
@@ -174,6 +185,7 @@ const districts = {
     'Chợ Mới'
   ]
 };
+
 export default function Cart() {
   const { extendsPurchases, setExtendsPurchases } = useContext(AppContext);
   const [openAddressDialog, setOpenAddressDialog] = useState(false);
@@ -201,6 +213,9 @@ export default function Cart() {
     commune: '',
     specific: ''
   });
+  const [vouchers, setVouchers] = useState([]);
+  const [selectedVoucher, setSelectedVoucher] = useState(null);
+  const [voucherCode, setVoucherCode] = useState('');
 
   const status = purchasesStatus.inCart;
   const queryClient = useQueryClient();
@@ -212,8 +227,6 @@ export default function Cart() {
     queryKey: ['purchasesCart', { status }],
     queryFn: () => purchasesApi.getPurchases()
   });
-
-
 
   let listCart : CartResponse = purchasesData?.data;
 
@@ -273,8 +286,6 @@ export default function Cart() {
     }
   }, [dataAddressResponse, isLoading, error]);
 
-
-
   const productRelateList = productRelateData?.data.data;
 
   const updatePurchaseMutation = useMutation({
@@ -330,13 +341,6 @@ export default function Cart() {
       toast.success("Update my address success")
     }
   })
-
-  // const getUserAddress = useMutation({
-  //   mutationFn:()=> AddressApi.getUserAddress(),
-  //   onSuccess:(res) =>{
-  //     console.log(res)
-  //   }
-  // })
 
   const buyProductMutation = useMutation({
     mutationFn: (param: {cartId: string, addressUserId: string}) => purchasesApi.buyProducts(param),
@@ -597,6 +601,22 @@ useEffect(()=>{
       console.log(param)
       buyProductMutation.mutate(param);
     })
+  };
+
+  const handleApplyVoucher = () => {
+    if (voucherCode) {
+      const voucher = vouchers.find(v => v.code === voucherCode);
+      if (voucher) {
+        setSelectedVoucher(voucher);
+        message.success('Áp dụng voucher thành công!');
+      } else {
+        message.error('Mã voucher không hợp lệ!');
+      }
+    } else if (selectedVoucher) {
+      message.success('Voucher đã được chọn!');
+    } else {
+      message.error('Vui lòng chọn hoặc nhập mã voucher!');
+    }
   };
 
   // @ts-ignore
@@ -987,6 +1007,30 @@ useEffect(()=>{
                 </>
             )}
           </div>
+
+          <Space style={{ marginTop: 16, marginBottom: 16, display: 'flex', flexDirection: 'column' }}>
+            <Title level={4}>Chọn Voucher</Title>
+            <Select
+              placeholder="Chọn voucher"
+              onChange={(value) => setSelectedVoucher(value)}
+              style={{ width: '100%', marginBottom: 8 }}
+            >
+              {vouchers.map(voucher => (
+                <Option key={voucher.id} value={voucher.code}>{voucher.name}</Option>
+              ))}
+            </Select>
+
+            <Input
+              placeholder="Nhập mã voucher"
+              value={voucherCode}
+              onChange={(e) => setVoucherCode(e.target.value)}
+              style={{ marginBottom: 8 }}
+            />
+
+            <Button type="primary" onClick={handleApplyVoucher}>
+              Áp dụng voucher
+            </Button>
+          </Space>
         </div>
       </div>
   );
