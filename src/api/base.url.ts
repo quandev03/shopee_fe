@@ -106,12 +106,20 @@ class AddressUrl extends Base {
     }
 
 }
+class AdminManager extends Base{
+    private urlV2: string = "/api-admin-manager"
+    private getDataDashBoard: string ="/get-data-dashboard"
+    public getUrlGetDataDashBoard (){
+        return this.url +this.urlV2 + this.getDataDashBoard
+    }
+}
 
 export class BaseUrl {
     public static Address: AddressUrl;
     public static AuthUrl: AuthUrl;
     public static CartUrl: CartUrl;
     public static ProductUrl: ProductUrl;
+    public static AdminManage: AdminManager
 
     // Phương thức khởi tạo các đối tượng tĩnh
     static initialize() {
@@ -119,8 +127,10 @@ export class BaseUrl {
         this.AuthUrl = new AuthUrl();
         this.CartUrl = new CartUrl();
         this.ProductUrl = new ProductUrl();
+        this.AdminManage = new AdminManager()
     }
 }
+
 
 // Khởi tạo các đối tượng tĩnh trong lớp BaseUrl
 BaseUrl.initialize();

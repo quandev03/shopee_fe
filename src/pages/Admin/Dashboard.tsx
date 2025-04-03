@@ -9,6 +9,7 @@ import {
   ClockCircleOutlined, WarningOutlined, TagOutlined
 } from '@ant-design/icons';
 import { Line } from 'react-chartjs-2';
+
 import {
   Chart as ChartJS,
   LineElement,
@@ -33,6 +34,10 @@ ChartJS.register(
 
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
+import {DashboardResponse, Order, Product, RevenueItem} from './../../Responses/DashboardResponse.ts';
+import {useQuery} from "@tanstack/react-query";
+import {AddressApi} from "../../api/address.api.ts";
+import {AdminManager} from "../../api/admin.api.ts";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -41,7 +46,16 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
   const navigate = useNavigate();
-  
+
+  const { data: dataDashBoardResponse } = useQuery({
+    queryKey: ['dataDashBoardResponse'],
+    queryFn: () => AdminManager.getDashBoard()
+  });
+  let dataDashBoard: DashboardResponse = dataDashBoardResponse?.data
+  console.log(dataDashBoard)
+
+
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -53,35 +67,31 @@ const Dashboard = () => {
     setTimeout(() => {
       const data = {
         stats: {
-          totalRevenue: 350000000,
-          totalOrders: 120,
-          totalUsers: 85,
-          totalProducts: 150,
-          pendingOrders: 15,
-          lowStockProducts: 8
+          totalRevenue: dataDashBoard.totalRevenue | 0,
+          totalOrders: dataDashBoard.totalOrders,
+          totalUsers: dataDashBoard.totalUser,
+          totalProducts: dataDashBoard.totalProducts,
+          pendingOrders: dataDashBoard.totalOrderPending|0,
+          lowStockProducts: dataDashBoard?.productOutOfStockLong
         },
-        recentOrders: [
-          { id: 'DH001', customerName: 'Nguyễn Văn A', total: 2500000, status: 'pending', date: '2023-05-20 10:30:00' },
-          { id: 'DH002', customerName: 'Trần Thị B', total: 3700000, status: 'confirmed', date: '2023-05-19 14:20:00' },
-          { id: 'DH003', customerName: 'Lê Văn C', total: 15000000, status: 'shipping', date: '2023-05-18 09:15:00' },
-          { id: 'DH004', customerName: 'Phạm Thị D', total: 800000, status: 'delivered', date: '2023-05-15 16:45:00' },
-          { id: 'DH005', customerName: 'Hoàng Văn E', total: 5000000, status: 'cancelled', date: '2023-05-14 11:10:00' },
-        ],
-        salesData: [
-          { date: '2023-05-14', revenue: 12000000 },
-          { date: '2023-05-15', revenue: 15000000 },
-          { date: '2023-05-16', revenue: 8000000 },
-          { date: '2023-05-17', revenue: 10000000 },
-          { date: '2023-05-18', revenue: 16000000 },
-          { date: '2023-05-19', revenue: 20000000 },
-          { date: '2023-05-20', revenue: 18000000 },
-        ],
-        lowStockProducts: [
-          { id: 1, name: 'iPhone 13', stock: 2, minStock: 5, image: 'https://example.com/img1.jpg' },
-          { id: 2, name: 'Samsung Galaxy S22', stock: 3, minStock: 5, image: 'https://example.com/img2.jpg' },
-          { id: 3, name: 'Tai nghe Bluetooth', stock: 4, minStock: 10, image: 'https://example.com/img4.jpg' },
-          { id: 4, name: 'Ốp lưng Samsung', stock: 5, minStock: 20, image: 'https://example.com/img3.jpg' },
-        ]
+        recentOrders: dataDashBoard.recentOrders.map((order: Order) => ({
+          id: order.orderId,
+          customerName: order.addressUser.fullName,
+          total: order.quantity*order.productDTO.price,
+          status: order.statusOrder,
+          date:  moment(order.createTime).format('YYYY-MM-DD HH:mm:ss')
+
+        })),
+        salesData: dataDashBoard.revenue7DayRecent.map((sale: RevenueItem) => ({
+          date: sale.date, revenue: sale.amount
+        })),
+        lowStockProducts: dataDashBoard.productOutOfStockLong.map((product: Product) => ({
+          id: product.id,
+          name: product.nameProduct,
+          stock: product.quantity,
+          minStock: 5,
+          image: product.image
+        }))
       };
       
       setDashboardData(data);
@@ -94,23 +104,23 @@ const Dashboard = () => {
     let text = '';
     
     switch (status) {
-      case 'pending':
+      case 'ORDER_WAITING_FOR_CONFIRMATION':
         color = 'gold';
         text = 'Chờ xác nhận';
         break;
-      case 'confirmed':
+      case 'ORDER_PACKING_GOODS':
         color = 'blue';
         text = 'Đã xác nhận';
         break;
-      case 'shipping':
+      case 'ORDER_TRANSPORT_GOODS':
         color = 'cyan';
         text = 'Đang vận chuyển';
         break;
-      case 'delivered':
+      case 'ORDER_SUCCESS':
         color = 'green';
         text = 'Đã giao hàng';
         break;
-      case 'cancelled':
+      case 'ORDER_CANCEL':
         color = 'red';
         text = 'Đã hủy';
         break;
@@ -242,7 +252,11 @@ const Dashboard = () => {
                 danger
                 onClick={() => navigate('/admin/products')}
               >
-                <WarningOutlined /> {dashboardData?.stats?.lowStockProducts} sản phẩm sắp hết hàng
+                {dashboardData?.stats?.lowStockProducts > 0 ? (
+                    <>
+                      <WarningOutlined /> {dashboardData?.stats?.lowStockProducts} sản phẩm sắp hết hàng
+                    </>
+                ) : null}
               </Button>
             </div>
           </Card>
@@ -265,7 +279,7 @@ const Dashboard = () => {
               <Col span={12}>
                 <Statistic
                   title="Tổng số voucher đang hoạt động"
-                  value={10}
+                  value={dataDashBoard.voucherCount.sumVoucherActive}
                   valueStyle={{ color: '#eb2f96' }}
                   prefix={<TagOutlined />}
                 />
@@ -273,7 +287,7 @@ const Dashboard = () => {
               <Col span={12}>
                 <Statistic
                   title="Voucher đã sử dụng trong tháng"
-                  value={150}
+                  value={dataDashBoard.voucherCount.sumVoucherUsed}
                   valueStyle={{ color: '#52c41a' }}
                   prefix={<TagOutlined />}
                 />
