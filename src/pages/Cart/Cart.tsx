@@ -30,6 +30,7 @@ import {
   Select,
   Space,
   message,
+  Button as AntdButton
 } from 'antd';
 
 const { Title } = Typography;
@@ -1007,30 +1008,6 @@ useEffect(()=>{
                 </>
             )}
           </div>
-
-          <Space style={{ marginTop: 16, marginBottom: 16, display: 'flex', flexDirection: 'column' }}>
-            <Title level={4}>Chọn Voucher</Title>
-            <Select
-              placeholder="Chọn voucher"
-              onChange={(value) => setSelectedVoucher(value)}
-              style={{ width: '100%', marginBottom: 8 }}
-            >
-              {vouchers.map(voucher => (
-                <Option key={voucher.id} value={voucher.code}>{voucher.name}</Option>
-              ))}
-            </Select>
-
-            <Input
-              placeholder="Nhập mã voucher"
-              value={voucherCode}
-              onChange={(e) => setVoucherCode(e.target.value)}
-              style={{ marginBottom: 8 }}
-            />
-
-            <Button type="primary" onClick={handleApplyVoucher}>
-              Áp dụng voucher
-            </Button>
-          </Space>
         </div>
       </div>
   );

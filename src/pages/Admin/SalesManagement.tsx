@@ -281,68 +281,68 @@ const SalesManagement = () => {
         </Col>
       </Row>
       
-      <Divider orientation="left">Biểu đồ doanh thu</Divider>
+      {/*<Divider orientation="left">Biểu đồ doanh thu</Divider>*/}
       
-      <Row gutter={16}>
-        <Col span={16}>
-          <Card title="Doanh thu theo ngày" loading={loading}>
-            <Line
-              key={JSON.stringify(revenueChartData)}
-              data={revenueChartData}
-              options={{ responsive: true, maintainAspectRatio: false, height: 300 }}
-            />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card title="Phân bố danh mục" loading={loading}>
-            <Pie
-              key={JSON.stringify(categoryChartData)}
-              data={categoryChartData}
-              options={{ responsive: true, maintainAspectRatio: false }}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {/*<Row gutter={16}>*/}
+      {/*  <Col span={16}>*/}
+      {/*    <Card title="Doanh thu theo ngày" loading={loading}>*/}
+      {/*      <Line*/}
+      {/*        key={JSON.stringify(revenueChartData)}*/}
+      {/*        data={revenueChartData}*/}
+      {/*        options={{ responsive: true, maintainAspectRatio: false, height: 300 }}*/}
+      {/*      />*/}
+      {/*    </Card>*/}
+      {/*  </Col>*/}
+      {/*  <Col span={8}>*/}
+      {/*    <Card title="Phân bố danh mục" loading={loading}>*/}
+      {/*      <Pie*/}
+      {/*        key={JSON.stringify(categoryChartData)}*/}
+      {/*        data={categoryChartData}*/}
+      {/*        options={{ responsive: true, maintainAspectRatio: false }}*/}
+      {/*      />*/}
+      {/*    </Card>*/}
+      {/*  </Col>*/}
+      {/*</Row>*/}
 
-      <Row gutter={16} style={{ marginTop: 16 }}>
-        <Col span={16}>
-          <Card title="Số lượng đơn hàng theo ngày" loading={loading}>
-            <Bar
-              key={JSON.stringify(orderChartData)}
-              data={orderChartData}
-              options={{ responsive: true, maintainAspectRatio: false, height: 300 }}
-            />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card title="Doanh thu theo danh mục" loading={loading}>
-            <Table 
-              dataSource={dashboardData?.categoryData}
-              rowKey="category"
-              pagination={false}
-              columns={[
-                {
-                  title: 'Danh mục',
-                  dataIndex: 'category',
-                  key: 'category',
-                },
-                {
-                  title: 'Doanh thu',
-                  dataIndex: 'revenue',
-                  key: 'revenue',
-                  render: (value) => new Intl.NumberFormat('vi-VN').format(value) + ' đ',
-                },
-                {
-                  title: '%',
-                  dataIndex: 'percentage',
-                  key: 'percentage',
-                  render: (value) => value + '%',
-                }
-              ]} 
-            />
-          </Card>
-        </Col>
-      </Row>
+      {/*<Row gutter={16} style={{ marginTop: 16 }}>*/}
+      {/*  <Col span={16}>*/}
+      {/*    <Card title="Số lượng đơn hàng theo ngày" loading={loading}>*/}
+      {/*      <Bar*/}
+      {/*        key={JSON.stringify(orderChartData)}*/}
+      {/*        data={orderChartData}*/}
+      {/*        options={{ responsive: true, maintainAspectRatio: false, height: 300 }}*/}
+      {/*      />*/}
+      {/*    </Card>*/}
+      {/*  </Col>*/}
+      {/*  <Col span={8}>*/}
+      {/*    <Card title="Doanh thu theo danh mục" loading={loading}>*/}
+      {/*      <Table */}
+      {/*        dataSource={dashboardData?.categoryData}*/}
+      {/*        rowKey="category"*/}
+      {/*        pagination={false}*/}
+      {/*        columns={[*/}
+      {/*          {*/}
+      {/*            title: 'Danh mục',*/}
+      {/*            dataIndex: 'category',*/}
+      {/*            key: 'category',*/}
+      {/*          },*/}
+      {/*          {*/}
+      {/*            title: 'Doanh thu',*/}
+      {/*            dataIndex: 'revenue',*/}
+      {/*            key: 'revenue',*/}
+      {/*            render: (value) => new Intl.NumberFormat('vi-VN').format(value) + ' đ',*/}
+      {/*          },*/}
+      {/*          {*/}
+      {/*            title: '%',*/}
+      {/*            dataIndex: 'percentage',*/}
+      {/*            key: 'percentage',*/}
+      {/*            render: (value) => value + '%',*/}
+      {/*          }*/}
+      {/*        ]} */}
+      {/*      />*/}
+      {/*    </Card>*/}
+      {/*  </Col>*/}
+      {/*</Row>*/}
       
       <Divider orientation="left">Phân tích sản phẩm & khách hàng</Divider>
       

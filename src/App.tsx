@@ -3,7 +3,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { ToastContainer } from "react-toastify";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import "react-toastify/dist/ReactToastify.css";
-import { useContext, useEffect } from "react";
+import React, {Suspense, useContext, useEffect} from "react";
 
 import AppProvider, { AppContext } from "./contexts/app.context";
 import useRouteElement from "./hooks/useRouteElement";
@@ -23,8 +23,12 @@ import OrderManagement from './pages/Admin/OrderManagement';
 import SalesManagement from './pages/Admin/SalesManagement';
 import {localStorageEventTarget} from "./utils/auth.ts";
 import Vouchers from "./pages/Admin/Vouchers.tsx";
-import ProductDetail from "./pages/ProductDetail";
-
+import ProductDetail from './pages/ProductDetail/ProductDetail.tsx';
+import Cart from "./pages/Cart/index.ts";
+import Profile from "./pages/User/pages/Profile/index";
+import PurchaseHistory from  "./pages/User/pages/PurchaseHistory/index"
+import UserProfile from  "./pages/User/layout/UserLayout/index"
+import ChangePassword from  "./pages/User/pages/ChangePassword/index"
 function App() {
     const { clearData } = useContext(AppContext);
 
@@ -46,7 +50,15 @@ function App() {
                     {/* Routes người dùng */}
                     <Route path="/" element={<MainLayout />}>
                         <Route index element={<HomePage />} />
-                        <Route path=':id' element={<ProductDetail/>} />
+                        <Route path=':nameId' element={<ProductDetail />} />
+                        <Route path='cart' element = {<Cart/>} />
+
+                        <Route path="user/" element={<UserProfile/>} >
+                            <Route path= 'profile' element={<Profile/>} />
+                            <Route path= "purchase" element={<PurchaseHistory/>} />
+                            <Route path= "password" element={<ChangePassword/>} />
+                        </Route>
+
                     </Route>
 
                     {/* Auth */}
