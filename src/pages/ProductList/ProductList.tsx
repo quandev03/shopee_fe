@@ -8,7 +8,8 @@ import AsideFilter from './components/AsideFilter';
 import Product from './components/Product';
 import SortProduct from './components/SortProduct';
 import { Helmet } from 'react-helmet-async';
-import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import {ProductResponseAPI} from "../../@types/product-res.type.ts";
 import {CategoryType} from "../../@types/category.type.ts";
 
@@ -19,54 +20,57 @@ type Pagination = {
 }
 export default function ProductList() {
   const queryConfig = useQueryConfig();
+
+  const navigate = useNavigate();
+  const limit = 12;
   console.log("Trang chủ")
   const { data: productsData, isLoading, isError } = useQuery(
-      ['productList', queryConfig],  // queryKey bao gồm cả 'productList' và queryConfig
-      async (): Promise<any> => {
-        return productApi.getProductList(queryConfig as ProductListConfig);  // Gọi API với queryConfig đã được xác định
-      },
-      {
-        keepPreviousData: true,  // Giữ dữ liệu cũ khi thay đổi queryConfig
-        refetchOnWindowFocus: false,  // Nếu cần, có thể tắt refetch khi focus lại cửa sổ
-        staleTime: 1000 * 60 * 5,  // Tùy chọn: Đặt thời gian stale (ví dụ 5 phút)
-        retry: 1  // Tùy chọn: Thử lại 1 lần nếu có lỗi
-      }
+    ['productList', JSON.stringify(queryConfig)],
+
+    async (): Promise<any> => {
+      return productApi.getProductList({
+        page: Number(queryConfig.page) || 0,
+        limit: Number(queryConfig.limit) || 12,
+        priceMin: queryConfig.priceMin !== 'null' ? Number(queryConfig.priceMin) : undefined,
+        priceMax: queryConfig.priceMax !== 'null' ? Number(queryConfig.priceMax) : undefined,
+        category: queryConfig.category !== 'null' ? queryConfig.category : undefined,
+        rating: Number(queryConfig.rating) || null,
+        name: queryConfig.name !== 'null' ? queryConfig.name : undefined,
+        sort: queryConfig.sort_by !== 'null' ? queryConfig.sort_by : undefined
+      });
+    },
+    {
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5,
+      retry: 1
+    }
   );
 
   console.log(productsData)
   let responseData: ProductResponseAPI | undefined = productsData?.data;
-  console.log(responseData)
-
-  let dataProduct = productsData?.data?.content;
-
-  let pagination:Pagination = {
-    page: productsData?.data?.pageable?.pageNumber,
-    limit: productsData?.data?.pageable?.pageSize,
-    page_size : Math.ceil(productsData?.data?.pageable?.pageSize / productsData?.data?.pageable?.pageNumber+1)
-  }
-  let test_data =  responseData?.content.map((productsData) => {
+  let paginatedProducts = responseData?.content?.map((item) => {
     return {
-      _id: productsData.id,
-      name: productsData.nameProduct,
-      description: productsData.description,
-      price: productsData.price,
-      quantity: productsData.quantity,
-      sold: productsData.soldQuantity,
-      view: productsData.viewedQuantity,
-      image: productsData.image ?? '',  // Handle null values
-      category: {
-        _id: productsData.category?.id, // Handle optional category
-        name: productsData.category?.name
-      },
-      rating: 0,
-      price_before_discount : productsData.price,
-      images: [], // Default to an empty array if images are missing
-      createdAt: "",
-      updatedAt: ""
+      _id: item.id,
+      name: item.nameProduct,
+      description: item.description || '',
+      price: item.price,
+      quantity: item.quantity,
+      sold: item.soldQuantity,
+      view: item.viewedQuantity,
+      image: item.image || '',
+      category: item.category ? {
+        _id: item.category.id,
+        name: item.category.name
+      } : null,
+      rating: item.rating || 0,
+      price_before_discount: item.price,
+      images: [],
+      createdAt: item.createDate || '',
+      updatedAt: ''
     };
-  });
-  console.log(test_data)
-
+  }) || [];
+  const totalPages = responseData?.totalPages || 1;
 
   const { data: categoriesData } = useQuery({
     queryKey: ['categories'],
@@ -101,13 +105,71 @@ export default function ProductList() {
             </div>
 
             <div className='col-span-10'>
-              {/*<SortProduct pageSize={pagination.page_size} queryConfig={queryConfig} />*/}
               <div className='mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'>
-                {test_data && test_data.map((product) => (
-                  <Product key={product._id} product={product} />
-                ))}
+                {paginatedProducts.length > 0 ? (
+                  paginatedProducts.map((product) => (
+                    <Product key={product._id} product={product} />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center text-gray-500 text-lg py-10">
+                    Không tìm thấy sản phẩm phù hợp với bộ lọc.
+                  </div>
+                )}
               </div>
-              <Pagination queryConfig={queryConfig} page={pagination.page} limit={pagination.limit} />
+              <div className="mt-6 flex justify-center items-center gap-1">
+                <button
+                  onClick={() => {
+                    if (Number(queryConfig.page) > 1) {
+                      navigate({
+                        search: new URLSearchParams({
+                          ...queryConfig,
+                          page: String(Number(queryConfig.page) - 1)
+                        }).toString()
+                      });
+                    }
+                  }}
+                  disabled={Number(queryConfig.page) <= 1}
+                  className="px-2 py-1 text-xl text-gray-400 disabled:opacity-30"
+                >
+                  &lt;
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => {
+                      navigate({
+                        search: new URLSearchParams({
+                          ...queryConfig,
+                          page: page.toString()
+                        }).toString()
+                      });
+                    }}
+                    className={`w-9 h-9 rounded border text-sm font-medium ${
+                      Number(queryConfig.page) === page
+                        ? 'bg-orange-500 text-white border-orange-500'
+                        : 'border-gray-300 text-black hover:border-orange-500 hover:text-orange-500'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  onClick={() => {
+                    if (Number(queryConfig.page) < totalPages) {
+                      navigate({
+                        search: new URLSearchParams({
+                          ...queryConfig,
+                          page: String(Number(queryConfig.page) + 1)
+                        }).toString()
+                      });
+                    }
+                  }}
+                  disabled={Number(queryConfig.page) >= totalPages}
+                  className="px-2 py-1 text-xl text-gray-400 disabled:opacity-30"
+                >
+                  &gt;
+                </button>
+              </div>
             </div>
           </div>
         )}

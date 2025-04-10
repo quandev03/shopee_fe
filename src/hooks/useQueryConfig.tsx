@@ -11,7 +11,7 @@ export default function useQueryConfig() {
         order: searchParams.get('order'),
         priceMax: searchParams.get('priceMax'),
         priceMin: searchParams.get('priceMin'),
-        rating: searchParams.get('reting'),
+        rating: searchParams.get('rating') || null,
         sort_by: searchParams.get('sort_by')
     };
 

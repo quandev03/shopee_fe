@@ -63,8 +63,8 @@ export default function ProductDetail() {
     description: responseData?.description,
     name: responseData?.nameProduct,
     category: {
-      _id: responseData?.category.id,
-      name: responseData?.category.name
+      _id: responseData?.category != null  ?responseData?.category.id : "",
+      name: responseData?.category != null ? responseData?.category.name : "Không Xác Định"
     },
     image: responseData?.image,
     createdAt: responseData?.createDate ? responseData?.createDate : "",

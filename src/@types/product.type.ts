@@ -32,12 +32,12 @@ export interface ProductListConfig {
   size?: number | string;
   order?: 'desc' | 'asc';
   sorty?: 'createdAt' | 'view' | 'sold' | 'price';
-  category?: string;
-  exclude?: string;
-  rating?: number | string;
-  priceMax?: number | string;
-  priceMin?: number | string;
-  nameProduct?: string;
+  category?: string | null;
+  exclude?: string | null;
+  rating?: number | null
+  priceMax?: number | null;
+  priceMin?: number | null ;
+  nameProduct?: string | null;
 }
 export interface Category {
   id: string;

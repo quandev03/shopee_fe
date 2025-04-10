@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosInstance, HttpStatusCode, InternalAxiosRequestConfig } from 'axios';
 import { toast } from 'react-toastify';
 import config from 'src/constants/config';
-import { AuthResponse, RefreshTokenResponse } from 'src/@types/auth.type';
+import { RefreshTokenResponse } from 'src/@types/auth.type';
 import {
   clearLS,
   getAccessTokenFromLS,

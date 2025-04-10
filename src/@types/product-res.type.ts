@@ -14,6 +14,7 @@ interface Product {
     images: string | null;
     image: string;
     category: Category;
+    rating: number
 }
 
 interface Pageable {

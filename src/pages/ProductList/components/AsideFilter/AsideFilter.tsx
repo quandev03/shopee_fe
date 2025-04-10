@@ -14,6 +14,7 @@ import { NoUndefinedField } from 'src/@types/utils.type';
 import { QueryConfig } from 'src/hooks/useQueryConfig';
 import InputV2 from 'src/components/Form/InputV2';
 import { useTranslation } from 'react-i18next';
+import { Rate } from 'antd';
 
 interface Props {
   queryConfig: QueryConfig;
@@ -32,8 +33,8 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
 
   const { handleSubmit, formState, control, trigger } = useForm<FormData>({
     defaultValues: {
-      priceMax: '',
-        priceMin: ''
+      priceMax: null,
+        priceMin: null
     },
     resolver: yupResolver(priceSchema)
   });
@@ -167,26 +168,7 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
                 trigger('priceMax');
               }}
             />
-
-            {/* <Controller
-              control={control}
-              name='price_min'
-              render={({ field }) => {
-                return (
-                  <InputNumber
-                    placeholder='₫ TỪ'
-                    className='flex items-center'
-                    classNameInput='w-full rounded-sm border border-gray-300 shadow-sm outline-none px-2 py-1'
-                    classNameError='hidden'
-                    {...field}
-                    onChange={(event) => {
-                      field.onChange(event);
-                      trigger('price_max');
-                    }}
-                  />
-                );
-              }}
-            /> */}
+              Đến
             <Controller
               control={control}
               name='priceMax'
@@ -223,8 +205,20 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
 
       <div className='text-sm'>
         <span className='capitalize'>{t('rating')}</span>
-
-        <RatingStar queryConfig={queryConfig} />
+        <div className='mt-2'>
+          <Rate
+            onChange={(value) => {
+              navigate({
+                pathname: path.home,
+                search: createSearchParams({
+                  ...queryConfig,
+                  page: '1',
+                  rating: String(value)
+                }).toString()
+              });
+            }}
+          />
+        </div>
       </div>
 
       <div className='my-4 h-[1px] bg-gray-200' />

@@ -7,6 +7,9 @@ import {
   LockOutlined, UnlockOutlined, DeleteOutlined, 
   UserOutlined, SearchOutlined, FilterOutlined 
 } from '@ant-design/icons';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { AdminManager } from "../../api/admin.api.ts";
+import { DataFilterUser, DataRenderUser, UserAdmin } from "../../Responses/useradmin.type.ts";
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -17,74 +20,126 @@ const AccountManagement = () => {
   const [roleModalVisible, setRoleModalVisible] = useState(false);
   const [currentAccount, setCurrentAccount] = useState(null);
   const [filteredAccounts, setFilteredAccounts] = useState([]);
-  const [filter, setFilter] = useState({ status: 'all', role: 'all' });
+  const [filter, setFilter] = useState({ status: 'all' });
   const [form] = Form.useForm();
   const [searchForm] = Form.useForm();
-  
-  useEffect(() => {
-    fetchAccounts();
-  }, []);
-  
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 5, total: 0 });
+
   useEffect(() => {
     applyFilters();
   }, [accounts, filter]);
 
-  const fetchAccounts = async () => {
-    setLoading(true);
-    try {
-      // Giả lập API call
-      setTimeout(() => {
-        const mockAccounts = [
-          { id: 1, username: 'user1', email: 'user1@example.com', fullName: 'Nguyễn Văn A', role: 'user', status: 'active', lastLogin: '2023-05-15' },
-          { id: 2, username: 'user2', email: 'user2@example.com', fullName: 'Trần Thị B', role: 'user', status: 'active', lastLogin: '2023-05-10' },
-          { id: 3, username: 'admin1', email: 'admin1@example.com', fullName: 'Lê Văn C', role: 'admin', status: 'active', lastLogin: '2023-05-14' },
-          { id: 4, username: 'user3', email: 'user3@example.com', fullName: 'Phạm Thị D', role: 'user', status: 'locked', lastLogin: '2023-04-30' },
-          { id: 5, username: 'mod1', email: 'mod1@example.com', fullName: 'Hoàng Văn E', role: 'moderator', status: 'active', lastLogin: '2023-05-12' },
-        ];
-        setAccounts(mockAccounts);
-        setFilteredAccounts(mockAccounts);
-        setLoading(false);
-      }, 500);
-    } catch (error) {
-      message.error('Lỗi khi tải danh sách tài khoản');
-      setLoading(false);
-    }
-  };
-
   const applyFilters = () => {
     let filtered = [...accounts];
-    
+
     if (filter.status !== 'all') {
       filtered = filtered.filter(account => account.status === filter.status);
     }
-    
-    if (filter.role !== 'all') {
-      filtered = filtered.filter(account => account.role === filter.role);
-    }
-    
+
     setFilteredAccounts(filtered);
   };
 
-  const handleSearch = (values) => {
+  const buildSearchBody = (values) => {
     const { searchText, searchField } = values;
-    
-    if (!searchText) {
+    const body = {};
+
+    body[searchField] = searchText || null;
+
+    // Thêm filter nếu cần gửi đi cùng body
+    if (filter.status !== 'all') {
+      body.status = filter.status;
+    }
+
+    return body;
+  };
+
+  const queryClient = useQueryClient();
+
+  const decentralization = useMutation({
+    mutationFn: (data:{key: string, userId: string})=> AdminManager.decentralization(data.key,  data.userId),
+    onSuccess: () => {
+      message.success("Thành Công");
+      queryClient.invalidateQueries(['dataUser']);
+    },
+    onError:(error, variables, context)=>{message.error("Thất bại")}
+  })
+
+  const {data: dataUser} = useQuery(({
+    queryKey: ['dataUser'],
+    queryFn: () => AdminManager.getUserAdmin([], [])
+  }))
+  let listUserAdmin : UserAdmin = dataUser?.data?.content
+  console.log(listUserAdmin)
+
+  let dataRenderUser : DataRenderUser[] =  listUserAdmin?.map((data: UserAdmin)=>({
+    id: data.id,
+    username: data.username,
+    phone: data.phoneNumber,
+    role: data.roles=="ROLE_USER"? "user": "moderator",
+    status: data ? "active": "locked",
+    fullName: data.fullName,
+    lastLogin: data.lastLogin || "Mới kích hoạt"
+  }))
+
+
+  useEffect(() => {
+    if (dataUser?.data?.content) {
+      const listUserAdmin: UserAdmin[] = dataUser.data.content;
+
+      const dataRenderUser: DataRenderUser[] = listUserAdmin.map((data: UserAdmin) => ({
+        id: data.id,
+        username: data.username,
+        phone: data.phoneNumber,
+        role: data.roles === "ROLE_USER" ? "user" : "moderator",
+        status: data.active ? "active" : "locked",
+        fullName: data.fullName,
+        lastLogin: data.lastLogin || "Mới kích hoạt",
+      }));
+
+      setAccounts(dataRenderUser);
+      setPagination({
+        current: dataUser.data.number + 1,
+        pageSize: dataUser.data.size,
+        total: dataUser.data.totalElements
+      });
+    }
+  }, [dataUser]);
+
+  const filterAccount= useMutation({
+    mutationFn: (data: string[])=> AdminManager.getUserAdmin(
+        [data[0], "page"],
+        [data[1], data[2]]
+    ),
+    onSuccess: (res) => {
+      let listUserAdmin : UserAdmin = res?.data?.content
+      let dataRenderUser : DataRenderUser[] =  listUserAdmin?.map((data: UserAdmin)=>({
+        id: data.id,
+        username: data.username,
+        phone: data.phoneNumber,
+        role: data.roles=="ROLE_USER"? "user": "moderator",
+        status: data ? "active": "locked",
+        fullName: data.fullName,
+        lastLogin: data.lastLogin || "Mới kích hoạt"
+      }))
+      setAccounts(dataRenderUser)
+    }
+  })
+
+  const handleSearch = (values) => {
+    console.log('Trường được chọn để tìm kiếm:', values.searchField);
+    const body = buildSearchBody(values);
+    console.log(values)
+    console.log('Search body to send API:', body);
+    filterAccount.mutate([values.searchField, values.searchText. pagination.current])
+
+    if (!values.searchText) {
       applyFilters();
       return;
     }
-    
-    const filtered = accounts.filter(account => {
-      if (searchField === 'all') {
-        return (
-          account.username.toLowerCase().includes(searchText.toLowerCase()) ||
-          account.email.toLowerCase().includes(searchText.toLowerCase()) ||
-          account.fullName.toLowerCase().includes(searchText.toLowerCase())
-        );
-      } else {
-        return account[searchField].toLowerCase().includes(searchText.toLowerCase());
-      }
-    });
-    
+
+    const filtered = accounts.filter(account =>
+      account[values.searchField]?.toLowerCase().includes(values.searchText.toLowerCase())
+    );
     setFilteredAccounts(filtered);
   };
 
@@ -95,17 +150,25 @@ const AccountManagement = () => {
   const showRoleModal = (account) => {
     setCurrentAccount(account);
     form.setFieldsValue({ role: account.role });
+    console.log(form)
     setRoleModalVisible(true);
   };
 
   const handleRoleChange = async (values) => {
     try {
-      const updatedAccounts = accounts.map(item => 
-        item.id === currentAccount.id 
-          ? { ...item, role: values.role }
-          : item
-      );
-      setAccounts(updatedAccounts);
+      await decentralization.mutateAsync({ key: values.role, userId: currentAccount.id });
+      const res = await AdminManager.getUserAdmin([], []);
+      const listUserAdmin: UserAdmin[] = res.data.content;
+      const dataRenderUser: DataRenderUser[] = listUserAdmin.map((data: UserAdmin) => ({
+        id: data.id,
+        username: data.username,
+        phone: data.phoneNumber,
+        role: data.roles === "ROLE_USER" ? "user" : "moderator",
+        status: data.active ? "active" : "locked",
+        fullName: data.fullName,
+        lastLogin: data.lastLogin || "Mới kích hoạt"
+      }));
+      setAccounts(dataRenderUser);
       message.success('Cập nhật quyền tài khoản thành công');
       setRoleModalVisible(false);
     } catch (error) {
@@ -115,13 +178,8 @@ const AccountManagement = () => {
 
   const handleToggleStatus = async (account) => {
     try {
+      decentralization.mutate({key: "lock", userId: account.id})
       const newStatus = account.status === 'active' ? 'locked' : 'active';
-      const updatedAccounts = accounts.map(item => 
-        item.id === account.id 
-          ? { ...item, status: newStatus }
-          : item
-      );
-      setAccounts(updatedAccounts);
       message.success(`Tài khoản đã được ${newStatus === 'active' ? 'mở khóa' : 'khóa'} thành công`);
     } catch (error) {
       message.error('Lỗi khi thay đổi trạng thái tài khoản');
@@ -150,14 +208,14 @@ const AccountManagement = () => {
       key: 'username',
     },
     {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-    },
-    {
       title: 'Họ và tên',
       dataIndex: 'fullName',
       key: 'fullName',
+    },
+    {
+      title: 'Số điện thoại',
+      dataIndex: 'phone',
+      key: 'phone',
     },
     {
       title: 'Quyền',
@@ -190,7 +248,7 @@ const AccountManagement = () => {
       key: 'action',
       render: (_, record) => (
         <Space size="small">
-          <Button 
+          <Button
             type="primary"
             icon={record.status === 'active' ? <LockOutlined /> : <UnlockOutlined />}
             onClick={() => handleToggleStatus(record)}
@@ -198,20 +256,12 @@ const AccountManagement = () => {
           >
             {record.status === 'active' ? 'Khóa' : 'Mở khóa'}
           </Button>
-          <Button 
+          <Button
             onClick={() => showRoleModal(record)}
             type="default"
           >
             Phân quyền
           </Button>
-          <Popconfirm
-            title="Bạn có chắc chắn muốn xóa tài khoản này?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Có"
-            cancelText="Không"
-          >
-            <Button icon={<DeleteOutlined />} danger>Xóa</Button>
-          </Popconfirm>
         </Space>
       ),
     },
@@ -226,22 +276,21 @@ const AccountManagement = () => {
   return (
     <div>
       <Title level={2}>Quản lý Tài khoản</Title>
-      
+
       <div style={{ marginBottom: 16 }}>
         <Form
           form={searchForm}
           layout="inline"
           onFinish={handleSearch}
-          initialValues={{ searchField: 'all' }}
+          initialValues={{ searchField: 'username' }}
         >
           <Form.Item name="searchText">
             <Input prefix={<SearchOutlined />} placeholder="Tìm kiếm tài khoản" />
           </Form.Item>
           <Form.Item name="searchField">
             <Select style={{ width: 140 }}>
-              <Option value="all">Tất cả</Option>
               <Option value="username">Tên người dùng</Option>
-              <Option value="email">Email</Option>
+              <Option value="phone">Số điện thoại</Option>
               <Option value="fullName">Họ và tên</Option>
             </Select>
           </Form.Item>
@@ -252,22 +301,7 @@ const AccountManagement = () => {
           </Form.Item>
         </Form>
       </div>
-      
-      <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center' }}>
-        <FilterOutlined style={{ marginRight: 8 }} />
-        <span style={{ marginRight: 12 }}>Lọc theo quyền:</span>
-        <Select
-          value={filter.role}
-          onChange={(value) => handleFilterChange('role', value)}
-          style={{ width: 140, marginRight: 16 }}
-        >
-          <Option value="all">Tất cả</Option>
-          <Option value="user">Người dùng</Option>
-          <Option value="moderator">Kiểm duyệt</Option>
-          <Option value="admin">Quản trị viên</Option>
-        </Select>
-      </div>
-      
+
       <Tabs
         defaultActiveKey="all"
         items={accountTypes.map(item => ({
@@ -277,12 +311,23 @@ const AccountManagement = () => {
         onChange={(key) => handleFilterChange('status', key)}
       />
 
-      <Table 
-        columns={columns} 
-        dataSource={filteredAccounts} 
-        rowKey="id" 
-        loading={loading} 
-        pagination={{ pageSize: 10 }}
+      <Table
+        columns={columns}
+        dataSource={filteredAccounts}
+        rowKey="id"
+        loading={loading}
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+          onChange: (page, pageSize) => {
+            setPagination(prev => {
+              const newPagination = { ...prev, current: page, pageSize };
+              filterAccount.mutate([searchForm.getFieldValue("searchField"), searchForm.getFieldValue("searchText"), (page).toString()]);
+              return newPagination;
+            });
+          }
+        }}
       />
 
       <Modal

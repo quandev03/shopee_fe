@@ -1,17 +1,21 @@
+import {ProductListConfig} from "../@types/product.type.ts";
+
 class Base {
     protected url = "http://localhost:8080";
-    protected genUrl = (urlV2: string, path: string, paramField: string[], dataParam: string[]) =>{
+    protected genUrl = (urlV2: string, path: string, paramField: string[], dataParam: any[]) =>{
         let urlFinal: string = this.url + urlV2 + path
         console.log(urlFinal)
-        let param: string = "?"
-        if(paramField.length !==0 && paramField.length === dataParam.length) {
-            paramField.forEach((value:string ,index: number) =>{
-                param += `${value}=${dataParam[index]}`
-                if(index!==paramField.length-1){
-                    param +="&"
+        if(paramField.length !== 0 && paramField.length === dataParam.length) {
+            const params: string[] = [];
+            paramField.forEach((key: string, index: number) => {
+                const value = dataParam[index];
+                if (value !== null && value !== undefined) {
+                    params.push(`${key}=${value}`);
                 }
-            })
-            urlFinal += param
+            });
+            if (params.length > 0) {
+                urlFinal += "?" + params.join("&");
+            }
         }else if(paramField.length === dataParam.length){
             console.log("Loi set param")
         }
@@ -20,15 +24,17 @@ class Base {
     protected genUrlNum = (urlV2: string, path: string, paramField: string[], dataParam: number[]) =>{
         let urlFinal: string = this.url + urlV2 + path
         console.log(urlFinal)
-        let param: string = "?"
-        if(paramField.length !==0 && paramField.length === dataParam.length) {
-            paramField.forEach((value:string ,index: number) =>{
-                param += `${value}=${dataParam[index]}`
-                if(index!==paramField.length-1){
-                    param +="&"
+        if(paramField.length !== 0 && paramField.length === dataParam.length) {
+            const params: string[] = [];
+            paramField.forEach((key: string, index: number) => {
+                const value = dataParam[index];
+                if (value !== null && value !== undefined) {
+                    params.push(`${key}=${value}`);
                 }
-            })
-            urlFinal += param
+            });
+            if (params.length > 0) {
+                urlFinal += "?" + params.join("&");
+            }
         }else if(paramField.length === dataParam.length){
             console.log("Loi set param")
         }
@@ -74,7 +80,14 @@ class CartUrl extends Base{
     }
 }
 
-class ProductUrl {}
+class ProductUrl extends Base{
+    private urlV2: string = "/product"
+    private getList: string = "/get-list"
+    public getUrlGetList(param: ProductListConfig){
+        return this.genUrl(this.urlV2, this.getList, ['page', 'size', 'order', 'sorty', 'category', 'exclude', 'rating', 'priceMin', "priceMax", 'nameProduct'],
+            [param.page, param.size, param.order, param.sorty, param.category, param.exclude, param.rating, param.priceMin, param.priceMax, param.nameProduct])
+    }
+}
 
 class AddressUrl extends Base {
     private urlV2: string = "/address-manage"
@@ -108,10 +121,73 @@ class AddressUrl extends Base {
 }
 class AdminManager extends Base{
     private urlV2: string = "/api-admin-manager"
+    private urlV2_product: string = "/product"
     private getDataDashBoard: string ="/get-data-dashboard"
+    private createVoucher: string = "/create-new-voucher"
+    private getAllVoucher: string = "/get-all-voucher"
+    private getAllProduct: string = "/get-all-product-mode-admin"
+    private getCategory:string = "/get-list-category"
+    private createCategory:string = "/create-new-category"
+    private createProduct: string = "/create"
+    private uploadImage: string = "/upload-image"
+    private getUser: string = "/get-all-user-for-admin"
+    private decentralizationAdmin: string = "/decentralization-admin"
+    private decentralizationUser: string = "/decentralization-user"
+    private decentralizationCensorship: string = "/decentralization-censorship"
+    private lockUnlockAccount: string = "/lock-unlock"
+    private getOrderAdmin: string = "/get-order-admin"
+    private getOrderDash: string = ""
     public getUrlGetDataDashBoard (){
         return this.url +this.urlV2 + this.getDataDashBoard
     }
+    public getUrlCreateVoucher(){
+        return this.url +this.urlV2 + this.createVoucher
+    }
+    public getUrlGetListVoucher(){
+        return this.url +this.urlV2 + this.getAllVoucher
+    }
+    public getUrlGetAllProduct(){
+        return this.url +this.urlV2 + this.getAllProduct
+    }
+    public getUrlGetCategory(){
+        return this.url + this.urlV2_product + this.getCategory
+    }
+    public getUrlCreteCategory(){
+        return this.url + this.urlV2_product + this.createCategory
+    }
+    public getUrlCreteProduct(){
+        return this.url + this.urlV2_product + this.createProduct
+    }
+    public getUrlUploadImage(param: any[]){
+        return this.genUrl(this.urlV2_product, this.uploadImage, ["isDefault", "productId"],param )
+    }
+    public getUrlGetUser(field: string[], value: any[]){
+        return this.genUrl(this.urlV2, this.getUser, field, value)
+    }
+    public decentralization(rule: string, userId: string){
+        let urlResponse: string = this.url + this.urlV2
+        let urlV3
+        if(rule == "user"){
+            urlV3 = this.decentralizationUser
+        }else if (rule == "admin") {
+            urlV3 = this.decentralizationAdmin
+        }else if(rule == "lock"){
+            urlV3 = this.lockUnlockAccount
+        }
+        else {
+            urlV3 = this.decentralizationCensorship
+        }
+
+        return `${urlResponse}${urlV3}?id=${userId}`
+    }
+    public getUrlOrderAdmin(field: string[], value: any[]){
+        console.log(this.genUrl(this.urlV2, this.getOrderAdmin, field, value))
+        return this.genUrl(this.urlV2, this.getOrderAdmin, field, value)
+    }
+    public getUrlOrderDash(){
+        return this.url + this.urlV2 + this.getOrderDash
+    }
+
 }
 
 export class BaseUrl {

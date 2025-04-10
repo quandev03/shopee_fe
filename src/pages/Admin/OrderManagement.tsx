@@ -10,6 +10,9 @@ import {
   DollarOutlined, ShoppingOutlined, FileTextOutlined, CalendarOutlined
 } from '@ant-design/icons';
 import moment from 'moment';
+import {useMutation} from "@tanstack/react-query";
+import {AdminManager} from "../../api/admin.api.ts";
+import {OrderRender, ResponseOrder, Order} from "../../Responses/order.type.ts";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -25,6 +28,36 @@ const OrderManagement = () => {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [dateRange, setDateRange] = useState(null);
 
+
+  const getOrders = useMutation({
+    mutationFn: (data: {field: string[], value: any[]})=> AdminManager.getOrderAdmin(data.field, data.value),
+    onSuccess: (res)=>{
+      let dataOrder: ResponseOrder = res?.data
+      console.log(dataOrder)
+      let ordersRender: OrderRender[] =dataOrder.content.map((order: Order)=>({
+        code: order.orderCode,
+        id: order.orderId,
+        customerName: order.addressUser.fullName,
+        customerPhone: order.addressUser.phone,
+        customerEmail: "",
+        total: order.quantity * order.productDTO.price,
+        status: order.statusOrder,
+        items: [
+          { id: order.productDTO.id, name: order.productDTO.nameProduct, price: order.productDTO.price, quantity: order.quantity, image: order.productDTO.image }
+        ],
+        address: `${order.addressUser.detailAddress} ,${order.addressUser.commercalAddress.nameAddress} , ${order.addressUser.districtAddress.nameAddress}, ${order.addressUser.provincialAddress.nameAddress}`,
+        createdAt: order.createTime,
+        paymentMethod: 'COD',
+        note: ""
+      }))
+      setOrders(ordersRender);
+
+    },
+    onError:(error)=> {
+      console.error("Loi")
+    }
+  })
+
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -35,89 +68,10 @@ const OrderManagement = () => {
 
   const fetchOrders = async () => {
     setLoading(true);
+    getOrders.mutate({field:[ ], value: []})
     try {
       // Giả lập API call
       setTimeout(() => {
-        const mockOrders = [
-          { 
-            id: 'DH001', 
-            customerName: 'Nguyễn Văn A', 
-            customerPhone: '0901234567',
-            customerEmail: 'nguyenvana@example.com',
-            total: 2500000, 
-            status: 'pending', 
-            items: [
-              { id: 1, name: 'iPhone 13', price: 2500000, quantity: 1, image: 'https://example.com/img1.jpg' }
-            ],
-            address: '123 Đường ABC, Quận 1, TP.HCM',
-            createdAt: '2023-05-20 10:30:00',
-            paymentMethod: 'COD',
-            note: 'Gọi trước khi giao hàng'
-          },
-          { 
-            id: 'DH002', 
-            customerName: 'Trần Thị B', 
-            customerPhone: '0907654321',
-            customerEmail: 'tranthib@example.com',
-            total: 3700000, 
-            status: 'confirmed', 
-            items: [
-              { id: 2, name: 'Samsung Galaxy S22', price: 2500000, quantity: 1, image: 'https://example.com/img2.jpg' },
-              { id: 3, name: 'Ốp lưng Samsung', price: 200000, quantity: 6, image: 'https://example.com/img3.jpg' }
-            ],
-            address: '456 Đường XYZ, Quận 2, TP.HCM',
-            createdAt: '2023-05-19 14:20:00',
-            paymentMethod: 'Banking',
-            note: ''
-          },
-          { 
-            id: 'DH003', 
-            customerName: 'Lê Văn C', 
-            customerPhone: '0903456789',
-            customerEmail: 'levanc@example.com',
-            total: 15000000, 
-            status: 'shipping', 
-            items: [
-              { id: 4, name: 'MacBook Air M1', price: 15000000, quantity: 1, image: 'https://example.com/img4.jpg' }
-            ],
-            address: '789 Đường KLM, Quận 7, TP.HCM',
-            createdAt: '2023-05-18 09:15:00',
-            paymentMethod: 'Banking',
-            note: 'Để hàng ở lễ tân'
-          },
-          { 
-            id: 'DH004', 
-            customerName: 'Phạm Thị D', 
-            customerPhone: '0904567890',
-            customerEmail: 'phamthid@example.com',
-            total: 800000, 
-            status: 'delivered', 
-            items: [
-              { id: 5, name: 'Tai nghe Bluetooth', price: 800000, quantity: 1, image: 'https://example.com/img5.jpg' }
-            ],
-            address: '101 Đường MNO, Quận 3, TP.HCM',
-            createdAt: '2023-05-15 16:45:00',
-            paymentMethod: 'COD',
-            note: ''
-          },
-          { 
-            id: 'DH005', 
-            customerName: 'Hoàng Văn E', 
-            customerPhone: '0905678901',
-            customerEmail: 'hoangvane@example.com',
-            total: 5000000, 
-            status: 'cancelled', 
-            items: [
-              { id: 6, name: 'iPad Mini', price: 5000000, quantity: 1, image: 'https://example.com/img6.jpg' }
-            ],
-            address: '202 Đường PQR, Quận 5, TP.HCM',
-            createdAt: '2023-05-14 11:10:00',
-            paymentMethod: 'COD',
-            note: 'Đã hủy theo yêu cầu của khách hàng'
-          },
-        ];
-        setOrders(mockOrders);
-        setFilteredOrders(mockOrders);
         setLoading(false);
       }, 500);
     } catch (error) {
@@ -138,7 +92,7 @@ const OrderManagement = () => {
     if (searchKeyword) {
       const keyword = searchKeyword.toLowerCase();
       result = result.filter(order => 
-        order.id.toLowerCase().includes(keyword) ||
+        order.code.toLowerCase().includes(keyword) ||
         order.customerName.toLowerCase().includes(keyword) ||
         order.customerPhone.includes(keyword) ||
         order.customerEmail.toLowerCase().includes(keyword)
@@ -186,23 +140,23 @@ const OrderManagement = () => {
     let text = '';
     
     switch (status) {
-      case 'pending':
+      case '0':
         color = 'gold';
         text = 'Chờ xác nhận';
         break;
-      case 'confirmed':
+      case '1':
         color = 'blue';
         text = 'Đã xác nhận';
         break;
-      case 'shipping':
+      case '2':
         color = 'cyan';
         text = 'Đang vận chuyển';
         break;
-      case 'delivered':
+      case '3':
         color = 'green';
         text = 'Đã giao hàng';
         break;
-      case 'cancelled':
+      case '4':
         color = 'red';
         text = 'Đã hủy';
         break;
@@ -480,12 +434,12 @@ const OrderManagement = () => {
         dataSource={filteredOrders} 
         rowKey="id" 
         loading={loading} 
-        pagination={{ pageSize: 10 }}
+        pagination={{ pageSize: 5 }}
       />
 
       {/* Modal xem chi tiết đơn hàng */}
       <Modal
-        title={<div>Chi tiết đơn hàng <Text strong>{currentOrder?.id}</Text></div>}
+        title={<div>Chi tiết đơn hàng <Text strong>{currentOrder?.code}</Text></div>}
         open={detailModalVisible}
         onCancel={() => setDetailModalVisible(false)}
         width={800}
