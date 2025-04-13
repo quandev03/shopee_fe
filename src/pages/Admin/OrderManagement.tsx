@@ -85,13 +85,13 @@ const OrderManagement = () => {
     
     // Lọc theo trạng thái
     if (activeTab !== 'all') {
-      result = result.filter(order => order.status === activeTab);
+      result = result.filter(order => order?.status === activeTab);
     }
     
     // Lọc theo từ khóa tìm kiếm
     if (searchKeyword) {
       const keyword = searchKeyword.toLowerCase();
-      result = result.filter(order => 
+      result = result.filter(order =>
         order.code.toLowerCase().includes(keyword) ||
         order.customerName.toLowerCase().includes(keyword) ||
         order.customerPhone.includes(keyword) ||
@@ -116,13 +116,24 @@ const OrderManagement = () => {
     setDetailModalVisible(true);
   };
 
+  const changeStatus = useMutation({
+    mutationFn: (data:{orderId: string, status: string}) => AdminManager.changeOrderStatus(data.orderId, data.status),
+    onSuccess:()=>{
+      message.success("Cập nhật thành công");
+      fetchOrders();
+    }
+  })
+
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
       const updatedOrders = orders.map(order => 
         order.id === orderId ? { ...order, status: newStatus } : order
       );
-      
-      setOrders(updatedOrders);
+
+      console.log(`change status order id ${orderId}: ${newStatus}`)
+
+      changeStatus.mutate({orderId: orderId, status: newStatus})
+      // setOrders(updatedOrders);
       
       // Cập nhật trạng thái của đơn hàng hiện tại (nếu đang xem chi tiết)
       if (currentOrder && currentOrder.id === orderId) {
@@ -140,23 +151,23 @@ const OrderManagement = () => {
     let text = '';
     
     switch (status) {
-      case '0':
+      case 0:
         color = 'gold';
         text = 'Chờ xác nhận';
         break;
-      case '1':
+      case 1:
         color = 'blue';
         text = 'Đã xác nhận';
         break;
-      case '2':
+      case 2:
         color = 'cyan';
         text = 'Đang vận chuyển';
         break;
-      case '3':
+      case 3:
         color = 'green';
         text = 'Đã giao hàng';
         break;
-      case '4':
+      case 4:
         color = 'red';
         text = 'Đã hủy';
         break;
@@ -170,20 +181,25 @@ const OrderManagement = () => {
 
   const getStatusStep = (status) => {
     switch (status) {
-      case 'pending': return 0;
-      case 'confirmed': return 1;
-      case 'shipping': return 2;
-      case 'delivered': return 3;
-      case 'cancelled': return -1;
+      case 0: return 0;
+      case 1: return 1;
+      case 2: return 2;
+      case 3: return 3;
+      case 4: return -1;
       default: return 0;
     }
   };
+  console.log(orders)
 
+  let allTotal: number = orders
+    .filter(order => order.status === 3)
+    .reduce((sum, order) => sum + order.total, 0);
+  console.log(allTotal)
   const renderActionButtons = (record) => {
-    const { status, id } = record;
+    const { status, id  } = record;
     
     switch (status) {
-      case 'pending':
+      case 0:
         return (
           <Space>
             <Button 
@@ -204,7 +220,7 @@ const OrderManagement = () => {
           </Space>
         );
         
-      case 'confirmed':
+      case 1:
         return (
           <Space>
             <Button 
@@ -225,7 +241,7 @@ const OrderManagement = () => {
           </Space>
         );
         
-      case 'shipping':
+      case 2:
         return (
           <Button 
             type="primary" 
@@ -236,12 +252,12 @@ const OrderManagement = () => {
           </Button>
         );
         
-      case 'delivered':
+      case 3:
         return (
           <Button type="default" disabled>Đã hoàn thành</Button>
         );
         
-      case 'cancelled':
+      case 4:
         return (
           <Button type="default" disabled>Đã hủy</Button>
         );
@@ -254,7 +270,7 @@ const OrderManagement = () => {
   const columns = [
     {
       title: 'Mã đơn hàng',
-      dataIndex: 'id',
+      dataIndex: 'code',
       key: 'id',
     },
     {
@@ -305,20 +321,22 @@ const OrderManagement = () => {
   ];
 
   // Thống kê đơn hàng
-  const pendingCount = orders.filter(o => o.status === 'pending').length;
-  const confirmedCount = orders.filter(o => o.status === 'confirmed').length;
-  const shippingCount = orders.filter(o => o.status === 'shipping').length;
-  const deliveredCount = orders.filter(o => o.status === 'delivered').length;
-  const cancelledCount = orders.filter(o => o.status === 'cancelled').length;
-  
+  const pendingCount = orders.filter(o => o.status === 0).length;
+  const confirmedCount = orders.filter(o => o.status === 1).length;
+  const shippingCount = orders.filter(o => o.status === 2).length;
+  const deliveredCount = orders.filter(o => o.status === 3).length;
+  const cancelledCount = orders.filter(o => o.status === 4).length;
+  console.log(orders)
   const orderTabs = [
     { key: 'all', tab: `Tất cả (${orders.length})` },
-    { key: 'pending', tab: `Chờ xác nhận (${pendingCount})` },
-    { key: 'confirmed', tab: `Đã xác nhận (${confirmedCount})` },
-    { key: 'shipping', tab: `Đang vận chuyển (${shippingCount})` },
-    { key: 'delivered', tab: `Đã giao hàng (${deliveredCount})` },
-    { key: 'cancelled', tab: `Đã hủy (${cancelledCount})` },
+    { key: 0, tab: `Chờ xác nhận (${pendingCount})` },
+    { key: 1, tab: `Đã xác nhận (${confirmedCount})` },
+    { key: 2, tab: `Đang vận chuyển (${shippingCount})` },
+    { key: 3, tab: `Đã giao hàng (${deliveredCount})` },
+    { key: 4, tab: `Đã hủy (${cancelledCount})` },
   ];
+
+
 
   return (
     <div>
@@ -379,7 +397,7 @@ const OrderManagement = () => {
             <Statistic
               title="Tổng doanh thu"
               value={orders
-                .filter(o => o.status === 'delivered')
+                .filter(o => o.status === 3)
                 .reduce((sum, order) => sum + order.total, 0)}
               valueStyle={{ color: '#52c41a' }}
               prefix={<DollarOutlined />}

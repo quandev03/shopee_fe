@@ -53,6 +53,9 @@ export const AdminManager = {
     },
     getOrderDash:()=>{
         return api.get<ResponseSuccessType<any>>(BaseUrl.AdminManage.getUrlOrderDash())
+    },
+    changeOrderStatus:(orderId: string, status: string)=>{
+        return api.put(BaseUrl.AdminManage.getUrlChangeStatus(orderId, status))
     }
 
 

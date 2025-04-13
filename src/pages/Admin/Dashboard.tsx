@@ -8,7 +8,7 @@ import {
   AppstoreOutlined, ArrowUpOutlined, ArrowDownOutlined,
   ClockCircleOutlined, WarningOutlined, TagOutlined
 } from '@ant-design/icons';
-import { Line } from 'react-chartjs-2';
+import { Line } from '@ant-design/plots';
 
 import {
   Chart as ChartJS,
@@ -54,73 +54,73 @@ const Dashboard = () => {
   let dataDashBoard: DashboardResponse = dataDashBoardResponse?.data
   console.log(dataDashBoard)
 
-
-
   useEffect(() => {
     fetchDashboardData();
   }, []);
-  
+
   const fetchDashboardData = async () => {
     setLoading(true);
-    
+
     // Giả lập API call
     setTimeout(() => {
       const data = {
         stats: {
-          totalRevenue: dataDashBoard.totalRevenue | 0,
+          totalRevenue: dataDashBoard.totalRevenue || 0,
           totalOrders: dataDashBoard.totalOrders,
           totalUsers: dataDashBoard.totalUser,
           totalProducts: dataDashBoard.totalProducts,
-          pendingOrders: dataDashBoard.totalOrderPending|0,
-          lowStockProducts: dataDashBoard?.productOutOfStockLong
+          pendingOrders: dataDashBoard.totalOrderPending || 0,
+          lowStockCount: dataDashBoard.productOutOfStockLong.length
         },
         recentOrders: dataDashBoard.recentOrders.map((order: Order) => ({
           id: order.orderId,
+          code: order.orderCode,
           customerName: order.addressUser.fullName,
-          total: order.quantity*order.productDTO.price,
+          total: order.quantity * order.productDTO.price,
           status: order.statusOrder,
-          date:  moment(order.createTime).format('YYYY-MM-DD HH:mm:ss')
-
+          date: moment(order.createTime).format('YYYY-MM-DD HH:mm:ss')
         })),
-        salesData: dataDashBoard.revenue7DayRecent.map((sale: RevenueItem) => ({
-          date: sale.date, revenue: sale.amount
+        salesData: dataDashBoard.revenue7DayRecent?.map((sale: RevenueItem) => ({
+          date: sale.date,
+          revenue: sale.amount
         })),
         lowStockProducts: dataDashBoard.productOutOfStockLong.map((product: Product) => ({
-          id: product.id,
+          id: product.productId, // Lưu ý: nếu productId luôn null, có thể dùng một giá trị khác hoặc index
           name: product.nameProduct,
           stock: product.quantity,
           minStock: 5,
-          image: product.image
+          image: product.imageUrl || ''
         }))
       };
-      
+
       setDashboardData(data);
       setLoading(false);
     }, 500);
   };
-  
+
+  console.log(dashboardData)
   const renderStatusTag = (status) => {
     let color = '';
     let text = '';
-    
+
     switch (status) {
-      case 'ORDER_WAITING_FOR_CONFIRMATION':
+      case 0:
         color = 'gold';
         text = 'Chờ xác nhận';
         break;
-      case 'ORDER_PACKING_GOODS':
+      case 1:
         color = 'blue';
         text = 'Đã xác nhận';
         break;
-      case 'ORDER_TRANSPORT_GOODS':
+      case 2:
         color = 'cyan';
         text = 'Đang vận chuyển';
         break;
-      case 'ORDER_SUCCESS':
+      case 3:
         color = 'green';
         text = 'Đã giao hàng';
         break;
-      case 'ORDER_CANCEL':
+      case 4:
         color = 'red';
         text = 'Đã hủy';
         break;
@@ -128,29 +128,32 @@ const Dashboard = () => {
         color = 'default';
         text = 'Không xác định';
     }
-    
+
     return <Tag color={color}>{text}</Tag>;
   };
-  
-  const revenueChartData = dashboardData ? {
-    labels: dashboardData?.salesData?.map(item => moment(item.date).format('DD/MM')),
-    datasets: [
-      {
-        label: 'Doanh thu (VNĐ)',
-        data: dashboardData?.salesData ? dashboardData.salesData.map(item => item.revenue) : [],
-        fill: true,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.4
-      }
-    ]
+
+  const revenueLineConfig = dashboardData && Array.isArray(dashboardData.salesData) ? {
+    data: dashboardData.salesData.map(item => ({
+      date: moment(item.date, 'DD/MM/YYYY').format('DD/MM'),
+      revenue: Number(item.revenue || 0)
+    })),
+    xField: 'date',
+    yField: 'revenue',
+    smooth: true,
+    tooltip: {
+      formatter: datum => {
+        return { name: 'Doanh thu (VNĐ)', value: new Intl.NumberFormat('vi-VN').format(datum.revenue) };
+      },
+    },
   } : null;
+
+  console.log(revenueLineConfig)
 
   const recentOrderColumns = [
     {
       title: 'Mã đơn hàng',
-      dataIndex: 'id',
-      key: 'id',
+      dataIndex: 'code',
+      key: 'code',
     },
     {
       title: 'Khách hàng',
@@ -161,7 +164,7 @@ const Dashboard = () => {
       title: 'Tổng tiền',
       dataIndex: 'total',
       key: 'total',
-      render: (total) => new Intl.NumberFormat('vi-VN').format(total) + ' đ',
+      render: (total) => <span>{new Intl.NumberFormat('vi-VN').format(total)} đ</span>,
     },
     {
       title: 'Trạng thái',
@@ -194,7 +197,7 @@ const Dashboard = () => {
               valueStyle={{ color: '#3f8600' }}
               prefix={<DollarOutlined />}
               suffix="đ"
-              formatter={(value) => new Intl.NumberFormat('vi-VN').format(value)}
+              formatter={(value) => <span>{new Intl.NumberFormat('vi-VN').format(value)}</span>}
             />
             <div style={{ marginTop: 8 }}>
               <Text type="secondary">
@@ -252,10 +255,10 @@ const Dashboard = () => {
                 danger
                 onClick={() => navigate('/admin/products')}
               >
-                {dashboardData?.stats?.lowStockProducts > 0 ? (
-                    <>
-                      <WarningOutlined /> {dashboardData?.stats?.lowStockProducts} sản phẩm sắp hết hàng
-                    </>
+                {dashboardData?.stats?.lowStockCount > 0 ? (
+                  <>
+                    <WarningOutlined /> {dashboardData.stats.lowStockCount} sản phẩm sắp hết hàng
+                  </>
                 ) : null}
               </Button>
             </div>
@@ -300,8 +303,8 @@ const Dashboard = () => {
       <Row gutter={16} style={{ marginTop: 16 }}>
         <Col span={16}>
           <Card title="Doanh thu 7 ngày gần nhất">
-            {revenueChartData ? (
-              <Line data={revenueChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+            {revenueLineConfig ? (
+              <Line {...revenueLineConfig} />
             ) : (
               <Text type="secondary">Không có dữ liệu doanh thu</Text>
             )}

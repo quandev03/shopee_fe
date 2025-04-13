@@ -66,9 +66,11 @@ class AuthUrl extends Base {
 
 class CartUrl extends Base{
     private urlV2: string = "/cart-order"
+    private urlV2_voucher: string = "/api-admin-manager"
     private createOrder: string="/create-order"
     private removeCart: string = "/remove-cart"
     private getOrderUser: string = "/get-order-by-status"
+    private getVoucher: string = "/get-list-voucher-can-apply"
     public getUrlCreateOrder(field: string[] , param: string[]): string{
         return this.genUrl(this.urlV2, this.createOrder, field, param)
     }
@@ -77,6 +79,9 @@ class CartUrl extends Base{
     }
     public getUrlOrderUser(field: string[] , param: number[]): string {
         return this.genUrlNum(this.urlV2, this.getOrderUser, field, param)
+    }
+    public getListVoucher(){
+        return this.url +this.urlV2_voucher +  this.getVoucher
     }
 }
 
@@ -97,6 +102,7 @@ class AddressUrl extends Base {
     private getUserAddress: string = "/get-my-address"
     private updateAddressUser:string ="/update-my-address"
     private deleteMyAddress: string ="/delete-my-address"
+    private addNewAddress: string = "/add-new-address"
 
     public getUrlGetListProvince(): string {
         console.log(this.url + this.getListProvince);
@@ -117,11 +123,15 @@ class AddressUrl extends Base {
     public getUrlDeleteAddressUser(field: string[], value: string[]): string{
         return this.genUrl(this.urlV2, this.deleteMyAddress,field, value)
     }
+    public getUrlAddNewAddress(): string{
+        return this.genUrl(this.urlV2, this.addNewAddress, [], [])
+    }
 
 }
 class AdminManager extends Base{
     private urlV2: string = "/api-admin-manager"
     private urlV2_product: string = "/product"
+    private urlV2_order: string = "/cart-order"
     private getDataDashBoard: string ="/get-data-dashboard"
     private createVoucher: string = "/create-new-voucher"
     private getAllVoucher: string = "/get-all-voucher"
@@ -137,6 +147,7 @@ class AdminManager extends Base{
     private lockUnlockAccount: string = "/lock-unlock"
     private getOrderAdmin: string = "/get-order-admin"
     private getOrderDash: string = ""
+    private changeStatusOrder: string = "/change-status-order"
     public getUrlGetDataDashBoard (){
         return this.url +this.urlV2 + this.getDataDashBoard
     }
@@ -186,6 +197,10 @@ class AdminManager extends Base{
     }
     public getUrlOrderDash(){
         return this.url + this.urlV2 + this.getOrderDash
+    }
+
+    public getUrlChangeStatus(orderId: string, status: string){
+        return this.url + this.urlV2_order + this.changeStatusOrder + `?orderStatus=${status}&orderId=${orderId}`
     }
 
 }

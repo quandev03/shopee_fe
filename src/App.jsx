@@ -5,7 +5,7 @@ import { useContext } from 'react';
 import { AppContext } from './contexts/app.context';
 
 // Lazy load các Routes
-const HomeRoutes = lazy(() => import('./routes/HomeRoutes'));
+const HomeRoutes = lazy(() => import('./routes/HomeRoutes.js'));
 const AdminRoutes = lazy(() => import('./routes/AdminRoutes'));
 const Login = lazy(() => import('./pages/Login/Login'));
 const Register = lazy(() => import('./pages/Register/Register'));

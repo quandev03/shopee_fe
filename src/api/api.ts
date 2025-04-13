@@ -65,8 +65,6 @@ export class Http {
       timeout: 10000,
       headers: {
         'Content-Type': 'application/json',
-        'expire-access-token': 5,
-        'expire-refresh-token': 60 * 60,
       },
     });
 
@@ -156,10 +154,10 @@ export class Http {
             }
 
             // Nếu refresh token cũng hết hạn, xóa toàn bộ token
-            // this.accessToken = '';
-            // this.refreshToken = '';
-            // clearLS();
-            // toast.error(error.response?.data?.message || 'Session expired. Please log in again.');
+            this.accessToken = '';
+            this.refreshToken = '';
+            clearLS();
+            toast.error(error.response?.data?.message || 'Session expired. Please log in again.');
           }
 
           return Promise.reject(error);

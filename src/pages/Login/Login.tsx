@@ -57,6 +57,7 @@ export default function Login() {
         console.log(result)
         let dataResponse:any = result.data
         let access_token = dataResponse.accessToken
+        let refresh_token = dataResponse.refreshToken
         let mappedRoles = mapBackendRoleToFrontend(dataResponse.roles)
         
         let user :User = {
@@ -74,7 +75,8 @@ export default function Login() {
         
         // Lưu token vào localStorage
         localStorage.setItem('access_token', access_token);
-        
+        localStorage.setItem('refresh_token', refresh_token);
+
         // Điều hướng người dùng dựa vào role
         if (mappedRoles.includes('Admin')) {
           // Nếu user có quyền Admin, chuyển đến trang admin

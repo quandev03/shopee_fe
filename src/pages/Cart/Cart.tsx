@@ -37,155 +37,13 @@ const { Title } = Typography;
 const { Option } = Select;
 
 const randomPage = randomInteger(1, 3).toString();
-const provinces = [
-  'Hà Nội',
-  'Hồ Chí Minh',
-  'Đà Nẵng',
-  'Hải Phòng',
-  'Cần Thơ',
-  'Hải Dương',
-  'Nghệ An',
-  'Thanh Hóa',
-  'Đồng Nai',
-  'Bình Dương',
-  'Quảng Ninh',
-  'Khánh Hòa',
-  'Lâm Đồng',
-  'Bà Rịa - Vũng Tàu',
-  'An Giang'
-];
 
-const districts = {
-  'Hà Nội': [
-    'Ba Đình',
-    'Hoàn Kiếm',
-    'Hai Bà Trưng',
-    'Đống Đa',
-    'Tây Hồ',
-    'Cầu Giấy',
-    'Thanh Xuân',
-    'Hoàng Mai',
-    'Long Biên',
-    'Bắc Từ Liêm',
-    'Nam Từ Liêm',
-    'Hà Đông'
-  ],
-  'Hồ Chí Minh': [
-    'Quận 1',
-    'Quận 2',
-    'Quận 3',
-    'Quận 4',
-    'Quận 5',
-    'Quận 6',
-    'Quận 7',
-    'Quận 8',
-    'Quận 9',
-    'Quận 10',
-    'Quận 11',
-    'Quận 12',
-    'Bình Thạnh',
-    'Gò Vấp',
-    'Phú Nhuận',
-    'Tân Bình',
-    'Tân Phú',
-    'Thủ Đức'
-  ],
-  'Đà Nẵng': [
-    'Hải Châu',
-    'Thanh Khê',
-    'Sơn Trà',
-    'Ngũ Hành Sơn',
-    'Liên Chiểu',
-    'Cẩm Lệ'
-  ],
-  'Hải Phòng': [
-    'Hồng Bàng',
-    'Lê Chân',
-    'Ngô Quyền',
-    'Kiến An',
-    'Hải An',
-    'Đồ Sơn',
-    'Dương Kinh'
-  ],
-  'Cần Thơ': [
-    'Ninh Kiều',
-    'Cái Răng',
-    'Bình Thủy',
-    'Ô Môn',
-    'Phong Điền',
-    'Thốt Nốt'
-  ],
-  'Hải Dương': [
-    'TP Hải Dương',
-    'Chí Linh',
-    'Kinh Môn',
-    'Nam Sách',
-    'Thanh Hà'
-  ],
-  'Nghệ An': [
-    'TP Vinh',
-    'Cửa Lò',
-    'Hoàng Mai',
-    'Quế Phong',
-    'Quỳnh Lưu'
-  ],
-  'Thanh Hóa': [
-    'TP Thanh Hóa',
-    'Sầm Sơn',
-    'Bỉm Sơn',
-    'Nga Sơn',
-    'Hậu Lộc'
-  ],
-  'Đồng Nai': [
-    'Biên Hòa',
-    'Long Khánh',
-    'Trảng Bom',
-    'Long Thành',
-    'Nhơn Trạch'
-  ],
-  'Bình Dương': [
-    'Thủ Dầu Một',
-    'Dĩ An',
-    'Thuận An',
-    'Tân Uyên',
-    'Bến Cát'
-  ],
-  'Quảng Ninh': [
-    'Hạ Long',
-    'Cẩm Phả',
-    'Uông Bí',
-    'Móng Cái',
-    'Đông Triều'
-  ],
-  'Khánh Hòa': [
-    'Nha Trang',
-    'Cam Ranh',
-    'Ninh Hòa',
-    'Cam Lâm',
-    'Vạn Ninh'
-  ],
-  'Lâm Đồng': [
-    'Đà Lạt',
-    'Bảo Lộc',
-    'Di Linh',
-    'Đơn Dương',
-    'Lạc Dương'
-  ],
-  'Bà Rịa - Vũng Tàu': [
-    'Vũng Tàu',
-    'Bà Rịa',
-    'Long Điền',
-    'Đất Đỏ',
-    'Xuyên Mộc'
-  ],
-  'An Giang': [
-    'Long Xuyên',
-    'Châu Đốc',
-    'Tân Châu',
-    'Châu Phú',
-    'Chợ Mới'
-  ]
-};
+type VoucherDTO = {
+  code:string,
+  id: string,
+  discount: number,
+  name: string
+}
 
 export default function Cart() {
   const { extendsPurchases, setExtendsPurchases } = useContext(AppContext);
@@ -217,6 +75,12 @@ export default function Cart() {
   const [vouchers, setVouchers] = useState([]);
   const [selectedVoucher, setSelectedVoucher] = useState(null);
   const [voucherCode, setVoucherCode] = useState('');
+  const [openVoucherDialog, setOpenVoucherDialog] = useState(false);
+  const handleOpenVoucherDialog = () => {
+    getListVoucher.mutate()
+    setOpenVoucherDialog(true)
+  };
+  const handleCloseVoucherDialog = () => setOpenVoucherDialog(false);
 
   const status = purchasesStatus.inCart;
   const queryClient = useQueryClient();
@@ -229,8 +93,28 @@ export default function Cart() {
     queryFn: () => purchasesApi.getPurchases()
   });
 
+  const { data: voucherFetch } = useQuery({
+    queryKey: ['voucherFetch', { status }],
+    queryFn: () => purchasesApi.getListVoucher()
+  });
+  console.log(voucherFetch)
+  useEffect(()=>{
+    setVouchers(voucherFetch?.data?.map(v=>({
+      id: v.id,
+      code: v.voucherCode,
+      description: v.description,
+      discount: v.discount
+    })))
+  }, [])
   let listCart : CartResponse = purchasesData?.data;
+  const getListVoucher = useMutation({
+    mutationFn:()=> purchasesApi.getListVoucher(),
+    onSuccess: (res) =>{
+      console.log(res)
+    }
+  })
 
+  console.log(vouchers)
   const { data: addressProvincial } = useQuery({
     queryKey: ['addressProvincial'],
     queryFn: () => AddressApi.getListProvince()
@@ -344,7 +228,7 @@ export default function Cart() {
   })
 
   const buyProductMutation = useMutation({
-    mutationFn: (param: {cartId: string, addressUserId: string}) => purchasesApi.buyProducts(param),
+    mutationFn: (param: {cartId: string, addressUserId: string , voucherCode: string}) => purchasesApi.buyProducts(param),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['purchasesCart', { status }] });
       toast.success("Đặt hàng thành công", { position: 'top-center' });
@@ -593,12 +477,13 @@ useEffect(()=>{
   };
 
   const handleBuyProduct = () => {
-    const listProduct:  {cartId: string, addressUserId: string}[] = checkedPurchases.map((purchase) => ({
+    const listProduct:  {cartId: string, addressUserId: string, voucherCode: string}[] = checkedPurchases.map((purchase) => ({
       addressUserId: selectedAddress?.id,
-      cartId: purchase?.id
+      cartId: purchase?.id,
+      voucherCode: selectedVoucher != null ? selectedVoucher.code : null
     }));
     console.log(listProduct)
-    listProduct.forEach((param:{cartId: string, addressUserId: string}) => {
+    listProduct.forEach((param:{cartId: string, addressUserId: string, voucherCode: string}) => {
       console.log(param)
       buyProductMutation.mutate(param);
     })
@@ -782,15 +667,24 @@ useEffect(()=>{
 
                         <div className="flex items-center justify-between gap-6 sm:gap-2 xl:justify-end">
                           <div>
-                            <div className="flex items-center gap-1">
-                              <p className="text-[12px] sm:text-[16px]">Tổng thanh toán ({checkedPurchasesCount}): </p>
-                              <span className="text-lg text-orange md:text-2xl">₫{formatCurrency(totalCheckedPurchasePrice)}</span>
+                          <div className="flex items-center gap-2">
+                              <Button
+                                className="border bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                                onClick={handleOpenVoucherDialog}
+                              >
+                                Danh sách voucher
+                              </Button>
+                          </div>
+                          <div className="flex items-center gap-1">
+                              <p className="text-[12px] sm:text-[16px]">Tổng thanh toán ({(checkedPurchasesCount*(1-(selectedVoucher?.discount||0)))}): </p>
+                                <span className="text-lg text-orange md:text-2xl">
+                                  ₫{formatCurrency(Math.max(totalCheckedPurchasePrice - ((selectedVoucher?.discount) *totalCheckedPurchasePrice || 0), 0))}
+                                </span>
                             </div>
                             <div className="grid grid-cols-12 items-center">
                               <span className="col-span-8 text-right text-[12px] sm:text-[16px] lg:col-span-10">Tiết kiệm</span>
                               <span className="col-span-4 text-right text-orange lg:col-span-2">
-                            ₫{formatNumberToSocialStyle(totalCheckedPurchaseSavingPrice)}
-                          </span>
+                              ₫{formatCurrency((selectedVoucher?.discount || 0) * totalCheckedPurchasePrice)}</span>
                             </div>
                           </div>
                           <Button
@@ -1009,6 +903,50 @@ useEffect(()=>{
             )}
           </div>
         </div>
+      {/* Voucher Dialog */}
+      <Dialog open={openVoucherDialog} onClose={handleCloseVoucherDialog} maxWidth="sm" fullWidth>
+        <DialogTitle>Danh sách Voucher</DialogTitle>
+        <DialogContent dividers>
+          <Table
+            dataSource={vouchers}
+            rowKey="code"
+            pagination={false}
+            columns={[
+              { title: 'Mã CODE', key: 'code' , render : (_, record) => `${record.code}`},
+              { title: 'Tên voucher', dataIndex: 'description', key: 'description' },
+              {
+                title: 'Tỉ lệ giảm',
+                key: 'discountAmount',
+                render: (_, record) => `${formatCurrency(record.discount * 100 || 0)}%`
+              },
+              {
+                title: 'Chọn',
+                key: 'action',
+                render: (_, record) => (
+                  <Button
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded"
+                    onClick={() => {
+                      setSelectedVoucher(record);
+                      message.success(`Đã chọn voucher ${record.code}`);
+                      handleCloseVoucherDialog();
+                    }}
+                  >
+                    Chọn
+                  </Button>
+                )
+              }
+            ]}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleCloseVoucherDialog}
+            className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded"
+          >
+            Đóng
+          </Button>
+        </DialogActions>
+      </Dialog>
       </div>
   );
 }

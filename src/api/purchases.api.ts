@@ -19,11 +19,14 @@ export const purchasesApi = {
     console.error(cartId)
     return api.delete<any>(BaseUrl.CartUrl.getUrlRemoveCart(["cartId"], [cartId]));
   },
-  buyProducts: (param: {cartId: string, addressUserId: string}) => {
-    return api.post<ResponseSuccessType<Purchases[]>>(BaseUrl.CartUrl.getUrlCreateOrder(["cartId", "addressUserId"], [param.cartId, param.addressUserId]));
+  buyProducts: (param: {cartId: string, addressUserId: string, voucherCode: string}) => {
+    return api.post<ResponseSuccessType<Purchases[]>>(BaseUrl.CartUrl.getUrlCreateOrder(["cartId", "addressUserId", "voucherCode"], [param.cartId, param.addressUserId, param.voucherCode]));
   },
   getPurchasesStatus :(status: number)=>{
     console.log(BaseUrl.CartUrl.getUrlOrderUser(["orderStatus"], [status]))
     return api.get<ResponseSuccessType<any>>(BaseUrl.CartUrl.getUrlOrderUser(["orderStatus"], [status]))
+  },
+  getListVoucher:()=>{
+    return api.get<ResponseSuccessType<any>>(BaseUrl.CartUrl.getListVoucher())
   }
 };

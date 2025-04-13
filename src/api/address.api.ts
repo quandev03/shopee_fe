@@ -21,6 +21,11 @@ export const AddressApi = {
     },
     deleteAddressUser: (addressId: string)=>{
         return api.delete<ResponseSuccessType<any>>(BaseUrl.Address.getUrlDeleteAddressUser(["id"], [addressId]))
-    }
+    },
+    addNewAddress:(data: {
+        nameAddress: string,
+        addressLevel: string,
+        beforeAddressId: string|null,
+    })=> api.post(BaseUrl.Address.getUrlAddNewAddress(), data)
 
 }

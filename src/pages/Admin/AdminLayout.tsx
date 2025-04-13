@@ -4,7 +4,8 @@ import {
   UserOutlined, 
   ShoppingOutlined, 
   BarChartOutlined,
-  DashboardOutlined
+  DashboardOutlined,
+  EnvironmentOutlined
 } from '@ant-design/icons';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import AdminBreadcrumb from './AdminBreadcrumb.tsx';
@@ -33,6 +34,11 @@ const AdminLayout = () => {
       label: <Link to="/admin/accounts">Quản lý Tài khoản</Link>,
     },
     {
+      key: 'address',
+      icon: <EnvironmentOutlined />,
+      label: <Link to="/admin/address">Quản lí địa chỉ</Link>,
+    },
+    {
       key: 'sales',
       icon: <BarChartOutlined />,
       label: <Link to="/admin/sales">Quản lý Bán hàng</Link>,
@@ -56,11 +62,11 @@ const AdminLayout = () => {
     <Layout style={{ minHeight: '100vh' }}>
       <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
         <div className="demo-logo-vertical" style={{ height: 32, margin: 16, background: 'rgba(255,255,255,.2)' }} />
-        <Menu 
-          theme="dark" 
-          defaultSelectedKeys={[selectedKey]} 
-          mode="inline" 
-          items={menuItems} 
+        <Menu
+          theme="dark"
+          defaultSelectedKeys={[selectedKey]}
+          mode="inline"
+          items={menuItems}
         />
       </Sider>
       <Layout>
@@ -83,4 +89,4 @@ const AdminLayout = () => {
   );
 };
 
-export default AdminLayout; 
+export default AdminLayout;

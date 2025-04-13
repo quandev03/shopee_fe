@@ -37,6 +37,7 @@ export interface Category {
 
 export interface Order {
     orderId: string;
+    orderCode:string;
     productDTO: Product;
     quantity: number;
     addressUser: AddressUser;

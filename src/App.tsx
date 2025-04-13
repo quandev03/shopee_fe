@@ -6,11 +6,10 @@ import "react-toastify/dist/ReactToastify.css";
 import React, {Suspense, useContext, useEffect} from "react";
 
 import AppProvider, { AppContext } from "./contexts/app.context";
-import useRouteElement from "./hooks/useRouteElement";
 import ErrorBoundary from "./components/ErrorBoundary";
 
-import MainLayout from './layouts/MainLayout';
-import HomePage from './pages/ProductList';
+import MainLayout from './layouts/MainLayout/index.ts';
+import HomePage from './pages/ProductList/index.ts';
 
 import Login from './pages/Login/Login';
 import Register from './pages/Register/Register';
@@ -29,18 +28,9 @@ import Profile from "./pages/User/pages/Profile/index";
 import PurchaseHistory from  "./pages/User/pages/PurchaseHistory/index"
 import UserProfile from  "./pages/User/layout/UserLayout/index"
 import ChangePassword from  "./pages/User/pages/ChangePassword/index"
+import AddressManager from "./pages/Admin/AddressManager.tsx";
 function App() {
     const { clearData } = useContext(AppContext);
-
-    useEffect(() => {
-        localStorageEventTarget.addEventListener("clearData", () => {
-            clearData();
-        });
-
-        return () => {
-            localStorageEventTarget.removeEventListener("clearData", clearData);
-        };
-    }, [clearData]);
 
     return (
         <HelmetProvider>
@@ -76,6 +66,7 @@ function App() {
                             <Route path="sales" element={<SalesManagement />} />
                             <Route path="revenue" element={<SalesManagement />} />
                             <Route path= "vouchers" element={<Vouchers/>} />
+                            <Route path= "address" element={<AddressManager/>} />
                             <Route path="*" element={<Navigate to="dashboard" replace />} />
                         </Route>
                     </Route>

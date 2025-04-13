@@ -6,23 +6,16 @@ import useQueryConfig from 'src/hooks/useQueryConfig';
 import {Category, ProductListConfig, ProductResponse, ProductType} from 'src/@types/product.type';
 import AsideFilter from './components/AsideFilter';
 import Product from './components/Product';
-import SortProduct from './components/SortProduct';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import {ProductResponseAPI} from "../../@types/product-res.type.ts";
 import {CategoryType} from "../../@types/category.type.ts";
 
-type Pagination = {
-  page: number,
-  limit: number,
-  page_size: number
-}
 export default function ProductList() {
   const queryConfig = useQueryConfig();
 
   const navigate = useNavigate();
-  const limit = 12;
   console.log("Trang chủ")
   const { data: productsData, isLoading, isError } = useQuery(
     ['productList', JSON.stringify(queryConfig)],

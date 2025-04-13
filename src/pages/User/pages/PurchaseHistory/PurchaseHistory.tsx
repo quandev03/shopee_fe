@@ -106,7 +106,7 @@ export default function PurchaseHistory() {
 
                         <div className='text-orange'>
                           <span>₫</span>
-                          <span className='text-sm'>{formatCurrency(purchase?.productDTO?.price)}</span>
+                          <span className='text-sm'>{formatCurrency(purchase?.productDTO?.price -(purchase?.productDTO?.price  * purchase?.discount))}</span>
                         </div>
                       </div>
                     </div>
@@ -135,7 +135,7 @@ export default function PurchaseHistory() {
 
                     <div className='ml-2 text-xl text-orange'>
                       <span>₫</span>
-                      {formatCurrency(purchase?.quantity * purchase?.productDTO?.price)}
+                      {formatCurrency((purchase?.quantity * purchase?.productDTO?.price) - (purchase?.quantity * purchase?.productDTO?.price)* purchase?.discount)}
                     </div>
                   </div>
                 </div>
