@@ -78,6 +78,7 @@ export default function ProductDetail() {
   const [showToastSuccess, setShowToastSuccess] = useState(false);
 
   const [buyCount, setBuyCount] = useState(1);
+  const [thisImage, setThisImage] = useState(0)
 
   const product = productDetail;
 
@@ -151,15 +152,28 @@ export default function ProductDetail() {
   };
 
   const prevSlice = () => {
-    if (currentImagesIndex[0] <= 0) return;
+    console.log("before")
+    // if (currentImagesIndex[0] <= 0) return;
+    if (thisImage == 0) return;
 
-    setCurrentImageIndex((prev) => [prev[0] - 1, prev[1] - 1]);
+    // setCurrentImageIndex((prev) => [prev[0] - 1, prev[1] - 1]);
+    setThisImage(thisImage-1)
+    console.log(thisImage)
   };
 
   const nextSlice = () => {
-    if (currentImagesIndex[1] >= (product as ProductType)?.images.length) return;
+    console.log("next")
+    // if (currentImagesIndex[1] >= (product as ProductType)?.images.length) return;
+    //
+    // setCurrentImageIndex((prev) => [prev[0] + 1, prev[1] + 1]);
+    // console.log(currentImagesIndex)
 
-    setCurrentImageIndex((prev) => [prev[0] + 1, prev[1] + 1]);
+    // if (currentImagesIndex[0] <= 0) return;
+    if (thisImage == productDetail.images.length) return;
+
+    // setCurrentImageIndex((prev) => [prev[0] - 1, prev[1] - 1]);
+    setThisImage(thisImage+1)
+    console.log(thisImage)
   };
 
   const handleImageZoom = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -211,11 +225,7 @@ export default function ProductDetail() {
     const res = await addToCartMutation.mutateAsync(body);
     const purchase = res.data.data;
 
-    navigate(path.cart, {
-      state: {
-        purchaseId: purchase._id
-      }
-    });
+    navigate(path.cart);
   };
 
   if (!product) return null;
@@ -244,7 +254,7 @@ export default function ProductDetail() {
               onMouseLeave={handleRemoveZoom}
             >
               <img
-                src={imageActived}
+                src={productDetail?.images?.length>0?productDetail?.images[thisImage]:"Khong"}
                 alt={product.name}
                 className='absolute left-0 top-0 h-full w-full  bg-white object-cover'
                 ref={imageRef}
@@ -268,7 +278,7 @@ export default function ProductDetail() {
                 </svg>
               </button>
 
-              {currentImagesList?.map((image) => {
+              {currentImagesList?.slice(currentImagesIndex[0], currentImagesIndex[1]).map((image) => {
                 const isActive = image === imageActived;
 
                 return (
@@ -336,12 +346,8 @@ export default function ProductDetail() {
               <span className='text-gray-500 line-through'>₫{
               //formatCurrency(product.price_before_discount)
 
-                role === 1?(
-                  <input type="text" placeholder={formatCurrency(product.price_before_discount)} style={{width: '100px', border: '1px solid '}}/>
-                )
-                : role === 0?(
+
                   <span className='text-xl font-medium uppercase'>{product.price_before_discount}</span>
-                ) : product.price_before_discount
 
               }</span>
 

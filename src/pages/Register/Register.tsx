@@ -40,6 +40,12 @@ export default function Register() {
   const registerAccountMutation = useMutation({
     mutationFn: (body: FormData) => {
       return authApi.registerAccount(body);
+    },
+    onSuccess: () => {
+      message.success('Đăng ký thành công');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 3000);
     }
   });
 

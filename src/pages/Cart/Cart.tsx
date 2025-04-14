@@ -206,8 +206,9 @@ export default function Cart() {
 
   const addNewAddressUser = useMutation({
     mutationFn:(body:AddressUserRequest)=> AddressApi.addNewAddressUser(body),
-    onSuccess:()=>{
-      console.log("Success")
+    onSuccess: () => {
+      console.log("Success");
+      queryClient.invalidateQueries({ queryKey: ['dataAddressResponse', queryConfig] })
     }
   })
 
@@ -828,7 +829,7 @@ useEffect(()=>{
                             <strong>{address.name}</strong> - {address.phone}
                           </p>
                           <p>
-                            {address.specific}, {address.commune}, {address.district}, {address.provincial}
+                            {address.detail}, {address.commune}, {address.district}, {address.province}
                           </p>
                           {address.default && <span className="text-green-500">[Mặc định]</span>}
                         </div>
@@ -838,12 +839,6 @@ useEffect(()=>{
                               onClick={() => handleEditAddress(address)}
                           >
                             Sửa
-                          </Button>
-                          <Button
-                              className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
-                              onClick={() => handleDeleteAddress(address.id)}
-                          >
-                            Xóa
                           </Button>
                           <Button
                               className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded"

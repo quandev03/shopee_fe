@@ -48,10 +48,14 @@ const ProductManagement = () => {
         category: product.category?.name || "Không xác định",
         stock: product.quantity,
         image: product.image,
+        description: product.description
       }));
+      console.log(mappedProducts)
       setProducts(mappedProducts);
     }
   });
+
+  console.log(productResponse)
 
   const { data: categoryResponse, refetch: refetchCategories } = useQuery({
     queryKey: ['categoryResponse'],
@@ -65,7 +69,6 @@ const ProductManagement = () => {
       setCategories(mappedCategories);
     }
   });
-
   const createCategory = useMutation({
     mutationFn:(body: {name:string})=>AdminManager.createCategory(body),
     onSuccess: () => {
@@ -120,6 +123,7 @@ const ProductManagement = () => {
   };
 
   const showDetailModal = (product) => {
+    console.log(product)
     setCurrentProduct(product);
     setDetailModalVisible(true);
   };
@@ -208,6 +212,7 @@ const ProductManagement = () => {
       message.error('Lỗi khi lưu sản phẩm');
     }
   };
+  console.log(products)
 
   const handleAddCategory = () => {
     setEditingId(null);
@@ -534,7 +539,10 @@ const ProductManagement = () => {
             <p><strong>Giá:</strong> {new Intl.NumberFormat('vi-VN').format(currentProduct.price)} VNĐ</p>
             <p><strong>Danh mục:</strong> {currentProduct.category}</p>
             <p><strong>Tồn kho:</strong> {currentProduct.stock}</p>
-            <p><strong>Mô tả:</strong> {currentProduct.description || 'Không có mô tả'}</p>
+            <p><strong>Mô tả:</strong></p>
+            <div style={{ whiteSpace: 'pre-wrap', backgroundColor: '#f5f5f5', padding: '8px', borderRadius: '4px' }}>
+              {currentProduct?.description || 'Không có mô tả'}
+            </div>
           </div>
         )}
       </Modal>

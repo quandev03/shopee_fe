@@ -1,7 +1,7 @@
 import {ProductListConfig} from "../@types/product.type.ts";
 
 class Base {
-    protected url = "http://localhost:8080";
+    protected url = "http://34.46.178.207:8080";
     protected genUrl = (urlV2: string, path: string, paramField: string[], dataParam: any[]) =>{
         let urlFinal: string = this.url + urlV2 + path
         console.log(urlFinal)

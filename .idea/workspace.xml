@@ -5,32 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f98e45fd-6f13-483b-8f50-84ed00fdb0ab" name="Changes" comment="admin">
-      <change afterPath="$PROJECT_DIR$/craco.config.cjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/pages/Admin/AddressManager.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shopee_fe.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shopee_fe.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/.cache/default-development/3.pack" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.cache/default-development/3.pack" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/.cache/default-development/4.pack" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.cache/default-development/4.pack" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/node_modules/.cache/default-development/5.pack" beforeDir="false" afterPath="$PROJECT_DIR$/node_modules/.cache/default-development/5.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Responses/DashboardResponse.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/Responses/DashboardResponse.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/address.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/address.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/admin.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/admin.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/api.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/api/base.url.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/base.url.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/category.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/category.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/api/purchases.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/api/purchases.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/constants/purchases.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/constants/purchases.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/layouts/MainLayout/MainLayout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/layouts/MainLayout/MainLayout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/Admin/AdminLayout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Admin/AdminLayout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/Admin/Dashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Admin/Dashboard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/Admin/OrderManagement.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Admin/OrderManagement.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/constants/config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/constants/config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/Admin/ProductManagement.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Admin/ProductManagement.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/pages/Cart/Cart.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Cart/Cart.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/Login/Login.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Login/Login.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/ProductList/ProductList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ProductList/ProductList.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/pages/User/pages/PurchaseHistory/PurchaseHistory.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/User/pages/PurchaseHistory/PurchaseHistory.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/ProductDetail/ProductDetail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/ProductDetail/ProductDetail.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/Register/Register.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/Register/Register.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/User/pages/Profile/Profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/User/pages/Profile/Profile.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/pages/User/pages/Profile/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/pages/User/pages/Profile/index.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,28 +61,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Node.js.admin.api.ts.executor&quot;: &quot;Run&quot;,
-    &quot;Node.js.api.ts.executor&quot;: &quot;Run&quot;,
-    &quot;Node.js.base.url.ts.executor&quot;: &quot;Run&quot;,
-    &quot;Node.js.product.api.ts.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SONARLINT_PRECOMMIT_ANALYSIS&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Volumes/MAC_Quandev03/Code/JS/Shopee&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;yarn&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;/Users/quandev03/Code/UI/Shopee/node_modules/typescript/lib&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Node.js.admin.api.ts.executor": "Run",
+    "Node.js.api.ts.executor": "Run",
+    "Node.js.base.url.ts.executor": "Run",
+    "Node.js.product.api.ts.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Volumes/MAC_Quandev03/Code/JS/Shopee",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_interpreter_path": "/Users/quandev03/Library/Application Support/JetBrains/IntelliJIdea2024.3/node/versions/22.14.0/bin/node",
+    "nodejs_package_manager_path": "yarn",
+    "settings.editor.selected.configurable": "settings.sync",
+    "ts.external.directory.path": "/Users/quandev03/Code/UI/Shopee/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -133,6 +118,7 @@
       <workItem from="1744284255381" duration="5797000" />
       <workItem from="1744519722891" duration="7580000" />
       <workItem from="1744548707652" duration="16078000" />
+      <workItem from="1744644836855" duration="4651000" />
     </task>
     <task id="LOCAL-00001" summary="merge code ngoc linh">
       <option name="closed" value="true" />
