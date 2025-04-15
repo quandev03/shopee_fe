@@ -4,4 +4,5 @@ export type CreateProductRequest = {
     price: number;
     quantity: number;
     soldQuantity: number;
+    categoryId: string
 };

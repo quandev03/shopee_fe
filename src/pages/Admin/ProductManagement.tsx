@@ -169,7 +169,8 @@ const ProductManagement = () => {
           description: newProduct.description,
           price: newProduct.price,
           quantity: newProduct.stock,
-          soldQuantity: 0
+          soldQuantity: 0,
+          categoryId: newProduct.category
         }
         createProduct.mutate(bodyCreate, {
           onSuccess: async (response) => {
@@ -203,7 +204,7 @@ const ProductManagement = () => {
 
 
 
-        setProducts([...products, newProduct]);
+        // setProducts([...products, newProduct]);
         message.success('Thêm sản phẩm thành công');
         await refetchProducts();
       }
@@ -307,14 +308,6 @@ const ProductManagement = () => {
             onClick={() => showEditModal(record)}
             type="primary"
           />
-          <Popconfirm
-            title="Bạn có chắc chắn muốn xóa sản phẩm này?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Có"
-            cancelText="Không"
-          >
-            <Button icon={<DeleteOutlined />} danger />
-          </Popconfirm>
         </Space>
       ),
     },
