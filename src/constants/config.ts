@@ -1,5 +1,5 @@
 const config = {
-  baseUrl: 'http://34.46.178.207:8080',
+  baseUrl: 'https://api.quandev03.id.vn',
   maxSizeUploadAvatar: 1048576 //Bytes
 };
 

@@ -73,8 +73,8 @@ export class Http {
 
           const noAuthRequired = config.url?.includes('/login') ||
               config.url?.includes('/register') ||
-              config.url?.includes('get-list') ||
-              config.url?.includes('dataProduct') ||
+              config.url?.includes('/get-list') ||
+              config.url?.includes('/dataProduct') ||
               config.url?.includes('/refresh-token')
           ;
 
