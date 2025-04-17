@@ -28,5 +28,8 @@ export const purchasesApi = {
   },
   getListVoucher:()=>{
     return api.get<ResponseSuccessType<any>>(BaseUrl.CartUrl.getListVoucher())
+  },
+  rating:(param: {orderId: string, rate: number}) =>{
+    return api.put(BaseUrl.CartUrl.getUrlRate(["orderId", "rate"], [param.orderId, param.rate]))
   }
 };

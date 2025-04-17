@@ -71,6 +71,7 @@ class CartUrl extends Base{
     private removeCart: string = "/remove-cart"
     private getOrderUser: string = "/get-order-by-status"
     private getVoucher: string = "/get-list-voucher-can-apply"
+    private raring: string = "/rate-product"
     public getUrlCreateOrder(field: string[] , param: string[]): string{
         return this.genUrl(this.urlV2, this.createOrder, field, param)
     }
@@ -82,6 +83,9 @@ class CartUrl extends Base{
     }
     public getListVoucher(){
         return this.url +this.urlV2_voucher +  this.getVoucher
+    }
+    public getUrlRate(field: string[] , param: any[]): string {
+        return this.genUrl(this.urlV2, this.raring, field, param)
     }
 }
 

@@ -10,12 +10,13 @@ import {
   setProfileToLS,
   setRefreshTokenToLS
 } from 'src/utils/auth';
-import { URL_LOGIN, URL_LOGOUT, URL_REFRESH_TOKEN, URL_REGISTER } from './auth.api';
+import {authApi, URL_LOGIN, URL_LOGOUT, URL_REFRESH_TOKEN, URL_REGISTER} from './auth.api';
 import { isAxiosErrorUnauthorized, isExpiredTokenError } from 'src/utils/utils';
 import { ResponseErrorType } from 'src/@types/utils.type';
 import { accessToken } from "../msw/auth.msw.ts";
 import * as jwt_decode from "jwt-decode";
 import { User } from "../@types/user.type.ts";
+import {useMutation} from "@tanstack/react-query";
 
 type Role = 'Admin' | 'User';
 interface JwtPayload {
@@ -23,6 +24,7 @@ interface JwtPayload {
   iat: number;
   [key: string]: any;  // Các trường khác trong token
 }
+
 
 // Hàm kiểm tra xem token đã hết hạn chưa
 function isTokenExpired(token: string): boolean {
@@ -120,14 +122,14 @@ export class Http {
             const data: any = error.response?.data;
             const message = data?.message || error.message;
             toast.error(message);
-          console.log(message)
+            console.log(message)
           }
           console.log(error)
-
-          if (error.status==403 && !isTokenExpired(getRefreshTokenFromLS())) {
+          if (error.status==403 && isTokenExpired(this.accessToken)) {
             const config = error.response?.config || ({ headers: {} } as InternalAxiosRequestConfig);
             const { url } = config;
             console.log(config)
+
 
             // Nếu token hết hạn, tiến hành refresh token
             if (url !== URL_REFRESH_TOKEN) {
@@ -136,6 +138,7 @@ export class Http {
                   ? this.refreshTokenRequest
                   : this.handleRefreshToken()?.finally(() => {
                     // Đảm bảo chỉ gọi refreshTokenRequest một lần trong vòng 3 giây
+                    console.log("REFRESH")
                     setTimeout(() => {
                       this.refreshTokenRequest = null;
                     }, 3000);
@@ -167,8 +170,9 @@ export class Http {
 
   private handleRefreshToken() {
     console.log("Attempting to refresh token...");
+    console.log(getRefreshTokenFromLS())
     return this.instance
-        .post<RefreshTokenResponse>(URL_REFRESH_TOKEN, { refreshToken: this.refreshToken })
+        .post<RefreshTokenResponse>(URL_REFRESH_TOKEN, { refreshToken: getRefreshTokenFromLS() })
         .then((res:any) => {
           console.log(res)
           this.accessToken = res.data;
@@ -177,7 +181,7 @@ export class Http {
         })
         .catch(() => {
           clearLS();
-          this.accessToken = '';
+          // this.accessToken = '';
           this.refreshToken = '';
           throw new Error('Unable to refresh token');
         });

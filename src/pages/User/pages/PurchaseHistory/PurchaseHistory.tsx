@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import {useMutation, useQuery} from '@tanstack/react-query';
 import classNames from 'classnames';
 import { Link, createSearchParams } from 'react-router-dom';
 import { purchasesApi } from 'src/api/purchases.api';
@@ -9,6 +10,7 @@ import { useQueryParams } from 'src/hooks/useQueryParams';
 import { PurchaseListStatus } from 'src/@types/purchases.type';
 import { formatCurrency, generateNameId } from 'src/utils/utils';
 import { Helmet } from 'react-helmet-async';
+import {Rate, Modal, message} from 'antd';
 
 const tabArrayData = [
   {
@@ -39,6 +41,10 @@ const tabArrayData = [
 
 export default function PurchaseHistory() {
   const params: { status?: string } = useQueryParams();
+  const [showRatingPopup, setShowRatingPopup] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [star, setStar] = useState(0)
+  const [currentId, setCurrentId] = useState(null)
 
   const status: number = Number(params.status) || purchasesStatus.all;
   console.log(status)
@@ -52,6 +58,42 @@ export default function PurchaseHistory() {
   console.log(dataPurchases)
 
   console.log(dataPurchases)
+
+  const handleRating = (star: number) => {
+    console.log(`Rated with ${star} stars`);
+    setStar(star)
+    // You can handle the rating here, such as sending it to the API
+      setIsModalOpen(true);
+     // Close the popup after rating
+
+  };
+  const rate = useMutation({
+    mutationFn:(param:{orderId: string, rate: number}) => purchasesApi.rating(param),
+    onSuccess:()=>{message.success("Đáy giá thành công")}
+  })
+
+  const handleOk = () => {
+    console.log(star)
+    rate.mutate({orderId: currentId, rate: star})
+
+    setIsModalOpen(false);
+    setShowRatingPopup(false);
+  };
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    setShowRatingPopup(false);
+  };
+
+  const handleConfirmRating = (star: number) => {
+    console.log(`Rating confirmed with ${star} stars`);
+    console.log("id: " + currentId)
+    setStar(star)
+    setIsModalOpen(true)
+
+    // Call API or save the rating here
+    // setShowRatingPopup(false); // Close the popup after confirmation
+  };
+
   return (
     <div className='relative'>
       <Helmet>
@@ -113,6 +155,21 @@ export default function PurchaseHistory() {
                   </Link>
 
                   <div className='my-4 h-[1px] w-full bg-gray-200' />
+                  <h1>Status: {purchase?.statusOrder}</h1>
+
+                  {Number(purchase?.statusOrder) === 3 && (
+                      <div className="flex justify-end mt-4">
+                        <button
+                            onClick={() => {
+                              setShowRatingPopup(true)
+                              setCurrentId(purchase?.orderId)
+                            }}
+                            className="px-4 py-2 bg-[#FF5733] text-white rounded-lg z-index"
+                        >
+                          Đánh giá sản phẩm
+                        </button>
+                      </div>
+                  )}
 
                   <div className='flex items-center justify-end'>
                     <div className='flex items-center gap-2 text-sm text-gray-700'>
@@ -151,6 +208,27 @@ export default function PurchaseHistory() {
             ))}
         </div>
       </div>
+      {showRatingPopup && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg">
+            <h3 className="text-xl mb-4">Đánh giá sản phẩm</h3>
+            <Rate onChange={handleConfirmRating}/>
+            <div className="mt-4 text-right">
+              <button
+                onClick={() => setShowRatingPopup(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+        <p>Bạn có chắc về đánh giá này</p>
+      </Modal>
+
     </div>
   );
 }

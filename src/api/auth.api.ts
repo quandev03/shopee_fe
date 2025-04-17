@@ -26,5 +26,8 @@ export const authApi = {
   },
   resetPassword: (body: {oldPassword: string, newPassword: string})=>{
     return api.put<ResponseSuccessType<any>>(BaseUrl.AuthUrl.getUrlResetPassword([], []), body)
-  }
+  },
+  getAccessToken: (body : {refreshToken: string})=>{
+    return api.post<string>(URL_REFRESH_TOKEN, body)
+}
 };

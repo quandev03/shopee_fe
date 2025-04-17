@@ -30,7 +30,22 @@ import UserProfile from  "./pages/User/layout/UserLayout/index"
 import ChangePassword from  "./pages/User/pages/ChangePassword/index"
 import AddressManager from "./pages/Admin/AddressManager.tsx";
 function App() {
-    const { clearData } = useContext(AppContext);
+    const { setIsAuthenticated, setProfile } = useContext(AppContext);
+
+    useEffect(() => {
+        const accessToken = localStorage.getItem('access_token');
+        const refreshToken = localStorage.getItem('refresh_token');
+        const profile = localStorage.getItem('profile');
+
+        if (accessToken && refreshToken && profile) {
+            // Thiết lập lại trạng thái đăng nhập và thông tin người dùng từ localStorage
+            setIsAuthenticated(true);
+            setProfile(JSON.parse(profile)); // Cập nhật profile từ localStorage
+        } else {
+            setIsAuthenticated(false);
+        }
+    }, [setIsAuthenticated, setProfile]);
+
 
     return (
         <HelmetProvider>
