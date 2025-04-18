@@ -57,7 +57,6 @@ export default function Register() {
 
         setIsAuthenticated(Boolean(access_token));
         setProfile(user);
-        messageApi.info('Hello, Ant Design!');
       },
       onError: (error) => {
         if (isAxiosErrorUnprocessableEntity<ResponseErrorType<Omit<FormData, 'confirm_password'>>>(error)) {
@@ -96,10 +95,10 @@ export default function Register() {
               <div className='mt-3'>
                 <Input
                   name='username'
-                  placeholder='username'
+                  placeholder='Tên đăng nhập'
                   errorMessage={errors.username?.message}
                   register={register}
-                  type='email'
+                  type='text'
                 />
               </div>
 
@@ -108,7 +107,7 @@ export default function Register() {
                   name='password'
                   type='password'
                   errorMessage={errors.password?.message}
-                  placeholder='Password'
+                  placeholder='Mật khẩu'
                   register={register}
                   autoComplete='on'
                   classNameOpenEye='absolute right-[6px] top-[12px] h-5 w-5 cursor-pointer'
@@ -119,7 +118,7 @@ export default function Register() {
                 <Input
                   name='phoneNumber'
                   register={register}
-                  placeholder='phoneNumber'
+                  placeholder='Số điện thoại'
                   type='text'
                   errorMessage={errors.phoneNumber?.message}
                   autoComplete='on'

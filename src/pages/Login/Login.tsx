@@ -158,7 +158,7 @@ export default function Login() {
             <div className='mt-3'>
               <Input
                 name='username'
-                placeholder='Username'
+                placeholder='Tên đăng nhập'
                 errorMessage={errors.username?.message}
                 register={register}
                 type='email'
@@ -170,7 +170,7 @@ export default function Login() {
                 name='password'
                 type='password'
                 errorMessage={errors.password?.message}
-                placeholder='Password'
+                placeholder='Mật khẩu'
                 register={register}
                 autoComplete='on'
                 classNameOpenEye='absolute right-[6px] top-[12px] h-5 w-5 cursor-pointer'
