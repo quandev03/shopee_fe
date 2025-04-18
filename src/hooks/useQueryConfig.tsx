@@ -7,7 +7,7 @@ export default function useQueryConfig() {
         limit: searchParams.get('limit') || '10',
         category: searchParams.get('category'),
         exclude: searchParams.get('exclude'),
-        name: searchParams.get('nameProduct'),
+        name: searchParams.get('name'),
         order: searchParams.get('order'),
         priceMax: searchParams.get('priceMax'),
         priceMin: searchParams.get('priceMin'),

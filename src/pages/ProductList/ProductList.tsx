@@ -14,7 +14,8 @@ import {CategoryType} from "../../@types/category.type.ts";
 
 export default function ProductList() {
   const queryConfig = useQueryConfig();
-
+  console.log(queryConfig)
+  console.log(queryConfig.name !== null)
   const navigate = useNavigate();
   console.log("Trang chủ")
   const { data: productsData, isLoading, isError } = useQuery(
@@ -28,7 +29,7 @@ export default function ProductList() {
         priceMax: queryConfig.priceMax !== 'null' ? Number(queryConfig.priceMax) : undefined,
         category: queryConfig.category !== 'null' ? queryConfig.category : undefined,
         rating: Number(queryConfig.rating) || null,
-        name: queryConfig.name !== 'null' ? queryConfig.name : undefined,
+        name: queryConfig.name !== null ? queryConfig.name : undefined,
         sort: queryConfig.sort_by !== 'null' ? queryConfig.sort_by : undefined
       });
     },

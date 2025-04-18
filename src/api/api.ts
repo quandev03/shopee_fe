@@ -17,6 +17,7 @@ import { accessToken } from "../msw/auth.msw.ts";
 import * as jwt_decode from "jwt-decode";
 import { User } from "../@types/user.type.ts";
 import {useMutation} from "@tanstack/react-query";
+import { message } from 'antd';
 
 type Role = 'Admin' | 'User';
 interface JwtPayload {
@@ -124,7 +125,8 @@ export class Http {
             toast.error(message);
             console.log(message)
           }
-          console.log(error)
+          message.error(error.response.data)
+
           if (error.status==403 && isTokenExpired(this.accessToken)) {
             const config = error.response?.config || ({ headers: {} } as InternalAxiosRequestConfig);
             const { url } = config;

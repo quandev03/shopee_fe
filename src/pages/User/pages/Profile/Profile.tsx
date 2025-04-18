@@ -252,7 +252,7 @@ export default function Profile() {
                 </div>
                 <div className='sm:w-[80%] sm:pl-5'>
                   <select className="h-[40px] w-[32%] rounded-sm border px-3 outline-none hover:border-orange">
-                    <option >Chon dc</option>
+                    <option >Chọn địa chỉ</option>
                     {profile?.addressList?.map((address) => (
                         <option key={address.id} value={address.id}>
                           Tên: {address.name} <br />

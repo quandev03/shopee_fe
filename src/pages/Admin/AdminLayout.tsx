@@ -1,21 +1,42 @@
 import React, { useState } from 'react';
-import { Layout, Menu, theme } from 'antd';
-import { 
-  UserOutlined, 
-  ShoppingOutlined, 
+import {Layout, Menu, theme, Button, Alert, Modal} from 'antd';
+import {
+  UserOutlined,
+  ShoppingOutlined,
   BarChartOutlined,
   DashboardOutlined,
-  EnvironmentOutlined
+  EnvironmentOutlined,
+  LogoutOutlined
 } from '@ant-design/icons';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import AdminBreadcrumb from './AdminBreadcrumb.tsx';
+import {clearLS} from "../../utils/auth.ts";
 
 const { Header, Content, Sider } = Layout;
 
 const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { token: { colorBgContainer, borderRadiusLG } } = theme.useToken();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+
+    clearLS()
+    setIsModalOpen(false);
+    navigate('/login');
+    return <Alert message="Success Text" type="success" />
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
 
   const menuItems = [
     {
@@ -71,6 +92,18 @@ const AdminLayout = () => {
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }} />
+        <Button
+          type="primary"
+          icon={<LogoutOutlined />}
+          style={{ position: 'absolute', top: 16, right: 16 }}
+          onClick={() => {
+            // Logic đăng xuất tại đây (ví dụ: xóa cookie, localStorage hoặc điều hướng về trang đăng nhập)
+            setIsModalOpen(true)
+
+          }}
+        >
+          Đăng xuất
+        </Button>
         <Content style={{ margin: '0 16px' }}>
           <AdminBreadcrumb />
           <div
@@ -84,6 +117,9 @@ const AdminLayout = () => {
             <Outlet />
           </div>
         </Content>
+        <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+          <p>Bạn có chắc sẽ đăng xuất chứ</p>
+        </Modal>
       </Layout>
     </Layout>
   );

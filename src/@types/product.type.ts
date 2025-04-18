@@ -37,7 +37,7 @@ export interface ProductListConfig {
   rating?: number | null
   priceMax?: number | null;
   priceMin?: number | null ;
-  nameProduct?: string | null;
+  name?: string | null;
 }
 export interface Category {
   id: string;

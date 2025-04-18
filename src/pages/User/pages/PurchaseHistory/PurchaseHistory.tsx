@@ -69,7 +69,7 @@ export default function PurchaseHistory() {
   };
   const rate = useMutation({
     mutationFn:(param:{orderId: string, rate: number}) => purchasesApi.rating(param),
-    onSuccess:()=>{message.success("Đáy giá thành công")}
+    onSuccess:()=>{message.success("Đánh giá thành công")}
   })
 
   const handleOk = () => {

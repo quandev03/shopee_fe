@@ -12,6 +12,7 @@ import { AppContext } from 'src/contexts/app.context';
 import Button from 'src/components/Button';
 import { Helmet } from 'react-helmet-async';
 import {User} from "../../@types/user.type.ts";
+import {message} from "antd";
 
 type FormData = Pick<Schema, 'username' | 'password'>;
 type Role = 'Admin' | 'User';
@@ -19,6 +20,8 @@ const loginSchema = schema.pick(['username', 'password']);
 
 export default function Login() {
   const navigate = useNavigate();
+  const key = 'updatable';
+  const [messageApi, contextHolder] = message.useMessage();
   const {
     formState: { errors },
     register,
@@ -41,7 +44,25 @@ export default function Login() {
       return role as Role; // Đảm bảo trả về kiểu Role
     });
   };
+  const openMessage = () => {
+    messageApi.open({
+      key,
+      type: 'loading',
+      content: 'Loading...',
+    });
 
+  };
+
+  const closeMessageSuccess = ()=>{
+    setTimeout(() => {
+      messageApi.open({
+        key,
+        type: 'success',
+        content: 'Loaded!',
+        duration: 2,
+      });
+    }, 1000);
+  }
   const loginAccountMutation = useMutation({
     mutationFn: (body: FormData) => {
       return authApi.loginAccount(body);
@@ -51,16 +72,17 @@ export default function Login() {
   const { setIsAuthenticated, setProfile } = useContext(AppContext);
 
   const onSubmit = handleSubmit((data) => {
+    openMessage();  // Hiển thị thông báo loading khi API được gọi
+
     loginAccountMutation.mutate(data, {
       onSuccess: (result) => {
-        //set token and refresh token into LS
-        console.log(result)
-        let dataResponse:any = result.data
-        let access_token = dataResponse.accessToken
-        let refresh_token = dataResponse.refreshToken
-        let mappedRoles = mapBackendRoleToFrontend(dataResponse.roles)
-        
-        let user :User = {
+        // set token and refresh token into LS
+        let dataResponse: any = result.data;
+        let access_token = dataResponse.accessToken;
+        let refresh_token = dataResponse.refreshToken;
+        let mappedRoles = mapBackendRoleToFrontend(dataResponse.roles);
+
+        let user: User = {
           roles: mappedRoles,
           _id: dataResponse.id,
           username: dataResponse.username,
@@ -68,23 +90,30 @@ export default function Login() {
           avatar: dataResponse.avatar,
           createdAt: "",
           updatedAt: ""
-        }
+        };
 
         setIsAuthenticated(Boolean(access_token));
         setProfile(user);
-        
+
         // Lưu token vào localStorage
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('refresh_token', refresh_token);
 
-        // Điều hướng người dùng dựa vào role
+        // Điều hướng người dùng dựa vào role (đã comment lại để kiểm tra)
+        message.success(`Đăng nhập thành công`)
         if (mappedRoles.includes('Admin')) {
-          // Nếu user có quyền Admin, chuyển đến trang admin
-          navigate('/admin/dashboard');
+          setTimeout(()=>{
+            message.success("Vai trò Quản trị viên/Kiểm duyệt viên")
+          }, 1000)
+          setTimeout(()=>{
+            navigate('/admin/dashboard');
+          }, 1500)
+
         } else {
-          // Người dùng thông thường được chuyển đến trang chủ
           navigate('/');
         }
+
+        closeMessageSuccess();  // Hiển thị thông báo thành công sau khi đăng nhập xong
       },
       onError: (error) => {
         if (isAxiosErrorUnprocessableEntity<ResponseErrorType<FormData>>(error)) {
@@ -99,6 +128,14 @@ export default function Login() {
             });
           }
         }
+
+        // Nếu có lỗi xảy ra, chúng ta có thể ẩn thông báo loading
+        messageApi.open({
+          key,
+          type: 'error',
+          content: 'Đăng nhập thất bại. Vui lòng thử lại.',
+          duration: 3,
+        });
       }
     });
   });

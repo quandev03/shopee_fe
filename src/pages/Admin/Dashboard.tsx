@@ -47,9 +47,10 @@ const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const navigate = useNavigate();
 
-  const { data: dataDashBoardResponse } = useQuery({
+  const { data: dataDashBoardResponse, refetch } = useQuery({
     queryKey: ['dataDashBoardResponse'],
-    queryFn: () => AdminManager.getDashBoard()
+    queryFn: () => AdminManager.getDashBoard(),
+    refetchOnWindowFocus: true,
   });
   let dataDashBoard: DashboardResponse = dataDashBoardResponse?.data
   console.log(dataDashBoard)
@@ -85,7 +86,7 @@ const Dashboard = () => {
           revenue: sale.amount
         })),
         lowStockProducts: dataDashBoard.productOutOfStockLong.map((product: Product) => ({
-          id: product.productId, // Lưu ý: nếu productId luôn null, có thể dùng một giá trị khác hoặc index
+          id: product.productId,
           name: product.nameProduct,
           stock: product.quantity,
           minStock: 5,
@@ -183,9 +184,18 @@ const Dashboard = () => {
     return <div>Đang tải dữ liệu...</div>;
   }
 
+  const handleRefreshData = () => {
+    refetch();
+  };
+
   return (
     <div>
       <Title level={2}>Dashboard</Title>
+
+      {/* Thêm nút tải lại dữ liệu */}
+      <Button onClick={handleRefreshData} style={{ marginBottom: '16px' }}>
+        Tải lại dữ liệu
+      </Button>
 
       <Row gutter={16}>
         <Col span={6}>

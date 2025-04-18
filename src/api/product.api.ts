@@ -17,7 +17,7 @@ export const productApi = {
       rating: params.rating || null,
       priceMax: params.priceMax || null ,
       priceMin: params.priceMin || null ,
-      nameProduct: params.nameProduct || null
+      nameProduct: params.name || null
     }
     return api.get<ResponseSuccessType<ProductList>>(BaseUrl.ProductUrl.getUrlGetList(param));
   },
