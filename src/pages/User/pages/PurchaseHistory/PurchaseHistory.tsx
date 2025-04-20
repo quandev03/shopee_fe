@@ -155,7 +155,6 @@ export default function PurchaseHistory() {
                   </Link>
 
                   <div className='my-4 h-[1px] w-full bg-gray-200' />
-                  <h1>Status: {purchase?.statusOrder}</h1>
 
                   {Number(purchase?.statusOrder) === 3 && (
                       <div className="flex justify-end mt-4">

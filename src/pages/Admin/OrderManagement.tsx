@@ -17,6 +17,10 @@ import {OrderRender, ResponseOrder, Order} from "../../Responses/order.type.ts";
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 const { Step } = Steps;
+type pagination = {
+  current: number,
+  totalElements: number
+}
 
 const OrderManagement = () => {
   const [orders, setOrders] = useState([]);
@@ -27,6 +31,9 @@ const OrderManagement = () => {
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [dateRange, setDateRange] = useState(null);
+  const [pagination, setPagination] = useState<pagination>({
+    current: 0,
+    totalElements: 5})
 
 
   const getOrders = useMutation({
@@ -34,7 +41,7 @@ const OrderManagement = () => {
     onSuccess: (res)=>{
       let dataOrder: ResponseOrder = res?.data
       console.log(dataOrder)
-      let ordersRender: OrderRender[] =dataOrder.content.map((order: Order)=>({
+      let ordersRender: OrderRender[] =dataOrder.map((order: Order)=>({
         code: order.orderCode,
         id: order.orderId,
         customerName: order.addressUser.fullName,
@@ -51,6 +58,10 @@ const OrderManagement = () => {
         note: ""
       }))
       setOrders(ordersRender);
+      setPagination({
+        current: 0,
+        totalElements: dataOrder.size
+      })
 
     },
     onError:(error)=> {
@@ -98,16 +109,42 @@ const OrderManagement = () => {
         order.customerEmail.toLowerCase().includes(keyword)
       );
     }
-    
+
     // Lọc theo khoảng thời gian
     if (dateRange) {
       const [startDate, endDate] = dateRange;
+
+      console.log("Start Date:", startDate);  // Kiểm tra giá trị của startDate
+      console.log("End Date:", endDate);      // Kiểm tra giá trị của endDate
+
+      // Chuyển đổi startDate và endDate sang dạng moment, sau đó chuyển về múi giờ địa phương và làm rõ thời gian là "ngày" mà không tính đến giờ
+      const momentStartDate = moment(startDate).local().startOf('day');  // Chuyển về múi giờ địa phương và làm rõ thời gian là "ngày"
+      const momentEndDate = moment(endDate).local().endOf('day');        // Chuyển về múi giờ địa phương và bao gồm toàn bộ ngày kết thúc
+
+      console.log("Converted Start Date:", momentStartDate);
+      console.log("Converted End Date:", momentEndDate);
+
+      // Kiểm tra tính hợp lệ của startDate và endDate
+      if (!momentStartDate.isValid()) {
+        console.error("Invalid Start Date:", startDate);
+      }
+
+      if (!momentEndDate.isValid()) {
+        console.error("Invalid End Date:", endDate);
+      }
+
       result = result.filter(order => {
-        const orderDate = moment(order.createdAt);
-        return orderDate.isBetween(startDate, endDate, 'day', '[]');
+        // Chuyển đổi order.createdAt thành đối tượng moment và chuyển về múi giờ địa phương
+        const orderDate = moment(order.createdAt).local();  // Chuyển về múi giờ địa phương
+
+        console.log("Order Date:", orderDate);
+
+        // Kiểm tra nếu orderDate nằm trong khoảng từ startDate đến endDate không
+        return orderDate.isSameOrAfter(momentStartDate) && orderDate.isSameOrBefore(momentEndDate);
       });
     }
-    
+
+    console.log(result)
     setFilteredOrders(result);
   };
 
@@ -422,8 +459,8 @@ const OrderManagement = () => {
             <RangePicker
               style={{ width: '100%' }}
               placeholder={['Từ ngày', 'Đến ngày']}
-              onChange={value => setDateRange(value)}
-              format="DD/MM/YYYY"
+              onChange={value => message.error("Tính năng đang phát triển")}
+              format="YYYY-MM-DDTHH:mm:ss.SSSS"
             />
           </Col>
           <Col span={8} style={{ textAlign: 'right' }}>
@@ -452,7 +489,7 @@ const OrderManagement = () => {
         dataSource={filteredOrders} 
         rowKey="id" 
         loading={loading} 
-        pagination={{ pageSize: 5 }}
+        pagination={{ pageSize: 5, total: pagination.totalElements}}
       />
 
       {/* Modal xem chi tiết đơn hàng */}

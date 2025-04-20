@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import {BrowserRouter, Routes, Route, Navigate, useNavigate} from 'react-router-dom';
 import { HelmetProvider } from "react-helmet-async";
 import { ToastContainer } from "react-toastify";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -31,6 +31,7 @@ import ChangePassword from  "./pages/User/pages/ChangePassword/index"
 import AddressManager from "./pages/Admin/AddressManager.tsx";
 function App() {
     const { setIsAuthenticated, setProfile } = useContext(AppContext);
+    const navigate = useNavigate()
 
     useEffect(() => {
         const accessToken = localStorage.getItem('access_token');
@@ -40,7 +41,13 @@ function App() {
         if (accessToken && refreshToken && profile) {
             // Thiết lập lại trạng thái đăng nhập và thông tin người dùng từ localStorage
             setIsAuthenticated(true);
+            let profiles =  JSON.parse(profile)
             setProfile(JSON.parse(profile)); // Cập nhật profile từ localStorage
+            if (profiles.roles ==='Admin'){
+                navigate("/admin/")
+            }else if(profiles.roles == "User"){
+                navigate("/")
+            }
         } else {
             setIsAuthenticated(false);
         }
